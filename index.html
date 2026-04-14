@@ -798,7 +798,7 @@
               : '') +
           '</div>' +
           '<div id="sr-mic-status" class="text-xs text-white/65 mt-2 hidden"></div>' +
-          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über OpenAI Whisper — deutsche Fachbegriffe werden in der Regel sauber transkribiert.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
+          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über OpenAI Whisper &amp; wird anschließend automatisch geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
         '</div>' +
         '<p class="text-xs text-white/55 leading-relaxed mb-5">' +
           'Hinweis: Dieser Score ist eine <strong>heuristische Orientierung</strong>, keine belastbare Prognose. Wir kalibrieren den Rechner laufend anhand echter Fälle. Die individuelle Prüfung durch uns kann deutlich abweichen — meistens im positiven Sinne, weil Details in den Score (noch) nicht einfließen.' +
@@ -934,7 +934,7 @@
       }
       var blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
       audioChunks = [];
-      setMic('transcribing', 'Transkribiere mit OpenAI Whisper …');
+      setMic('transcribing', 'Transkribiere &amp; glätte deine Aufnahme …');
 
       try {
         var resp = await fetch(TRANSCRIBE_URL, {
@@ -952,11 +952,14 @@
           setMic('idle', 'Keine Worte erkannt — nochmal, bitte etwas deutlicher.');
           return;
         }
-        var current = descField.value ? descField.value.replace(/\s+$/, '') + ' ' : '';
+        var current = descField.value ? descField.value.replace(/\s+$/, '') + '\n\n' : '';
         descField.value = current + text;
         state.answers.description = descField.value;
-        setMic('idle', 'Transkribiert ✓ — du kannst weiter diktieren oder tippen.');
-        setTimeout(function() { micStatus.classList.add('hidden'); }, 2500);
+        var suffix = data.cleaned
+          ? 'Transkribiert &amp; geglättet ✓ — du kannst frei nachbessern.'
+          : 'Transkribiert ✓ — du kannst frei nachbessern.';
+        setMic('idle', suffix);
+        setTimeout(function() { micStatus.classList.add('hidden'); }, 3500);
       } catch (e) {
         setMic('idle', 'Netzwerkfehler bei der Transkription: ' + (e.message || e));
       }
