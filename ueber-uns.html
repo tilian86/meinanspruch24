@@ -27,6 +27,10 @@
   .prose a { color: #f47935; text-decoration: underline; text-underline-offset: 2px; }
   .grad-primary { background: linear-gradient(135deg, #00465f 0%, #1b5e7b 55%, #2a7a3a 100%); }
   html, body { overflow-x: clip; max-width: 100vw; }
+  nav, nav > div, nav img { transition: height 0.25s ease, padding 0.25s ease, border-radius 0.25s ease, background-color 0.25s ease; }
+  nav.nav-compact > div { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; }
+  nav.nav-compact img { height: 3rem !important; border-radius: 0.5rem !important; }
+  @media (min-width: 640px) { nav.nav-compact img { height: 3.5rem !important; } }
 </style>
 </head>
 <body>
@@ -130,5 +134,8 @@
   </div>
 </footer>
 
+<script>
+(function(){var n=document.querySelector("nav");if(!n)return;var l=false;function u(){var y=window.pageYOffset||document.documentElement.scrollTop;var c=y>80;if(c!==l){n.classList.toggle("nav-compact",c);l=c;}}window.addEventListener("scroll",u,{passive:true});u();})();
+</script>
 </body>
 </html>
