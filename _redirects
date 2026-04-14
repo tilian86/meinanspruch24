@@ -1,0 +1,4 @@
+# Cloudflare Pages redirects
+# (This file is only active when meinanspruch24.de is the primary custom domain.)
+# Fallback: catch-all to root
+/index.html    /    301

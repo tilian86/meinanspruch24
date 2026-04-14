@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#001e2c"/>
+      <stop offset="50%" stop-color="#00465f"/>
+      <stop offset="100%" stop-color="#1b5e7b"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0.85" cy="0.2" r="0.5">
+      <stop offset="0%" stop-color="#4edea3" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#4edea3" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0.1" cy="0.9" r="0.5">
+      <stop offset="0%" stop-color="#93ceef" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#93ceef" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#6ffbbe"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow1)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+
+  <!-- Logo mark rechts -->
+  <g transform="translate(760 110)">
+    <rect x="0" y="0" width="320" height="320" rx="56" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1"/>
+    <g transform="translate(50 50) scale(3.7)">
+      <path d="M15 41 L22 41 L22 33 L29 33 L29 25 L36 25 L36 17 L46 17" stroke="url(#mark)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M42 13 L46 17 L42 21" stroke="url(#mark)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Text -->
+  <g font-family="Plus Jakarta Sans, system-ui, sans-serif">
+    <text x="80" y="150" fill="#6ffbbe" font-size="22" font-weight="700" letter-spacing="4">MEINANSPRUCH24</text>
+    <text x="80" y="290" fill="#ffffff" font-size="82" font-weight="800" letter-spacing="-2">Versicherung</text>
+    <text x="80" y="375" fill="#ffffff" font-size="82" font-weight="800" letter-spacing="-2">zahlt nicht?</text>
+    <text x="80" y="470" fill="#6ffbbe" font-size="62" font-weight="800" letter-spacing="-1.5">Wir holen dein Geld.</text>
+  </g>
+
+  <g font-family="Manrope, system-ui, sans-serif">
+    <text x="80" y="560" fill="#9bd6f7" font-size="24" font-weight="500">Auf Erfolgsbasis · Kein Risiko · Voll digital</text>
+  </g>
+</svg>

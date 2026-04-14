@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" fill="none">
+  <defs>
+    <linearGradient id="lg-mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00465f"/>
+      <stop offset="55%" stop-color="#1b5e7b"/>
+      <stop offset="100%" stop-color="#4edea3"/>
+    </linearGradient>
+  </defs>
+  <!-- Mark: abstrahiertes Schild + aufsteigender Pfeil -->
+  <g>
+    <rect x="4" y="4" width="52" height="52" rx="14" fill="url(#lg-mark)"/>
+    <!-- aufsteigende Treppenform = „Anspruch durchsetzen" -->
+    <path d="M17 41 L23 41 L23 33 L30 33 L30 25 L37 25 L37 17 L46 17" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>
+    <!-- Pfeilspitze -->
+    <path d="M42 13 L46 17 L42 21" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>
+  </g>
+  <!-- Wortmarke -->
+  <g font-family="Plus Jakarta Sans, system-ui, sans-serif" font-weight="800" font-size="22" letter-spacing="-0.5">
+    <text x="70" y="38" fill="#00465f">MeinAnspruch</text>
+    <text x="230" y="38" fill="#004b31">24</text>
+  </g>
+</svg>
