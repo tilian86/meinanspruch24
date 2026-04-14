@@ -936,7 +936,7 @@
       mediaRecorder.onstop = onRecordingStopped;
       mediaRecorder.start();
       recordStart = Date.now();
-      setMic('recording', 'Ich nehme auf — sprich einfach los. Nochmal auf's Icon zum Stoppen.');
+      setMic('recording', 'Ich nehme auf — sprich einfach los. Nochmal auf das Icon tippen zum Stoppen.');
       autoStopTimer = setTimeout(function() {
         if (recordingState === 'recording') {
           setMic('recording', 'Maximale Aufnahmezeit (5 Min) erreicht — beende die Aufnahme.');
