@@ -229,7 +229,7 @@
         </div>
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-tertiary">lock</span>
-          <span class="text-sm font-semibold">DSGVO-konform · Server in Deutschland</span>
+          <span class="text-sm font-semibold">DSGVO-konform · Keine lokale Datenspeicherung</span>
         </div>
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-tertiary">balance</span>
@@ -815,7 +815,7 @@
               : '') +
           '</div>' +
           '<div id="sr-mic-status" class="text-xs text-white/65 mt-2 hidden"></div>' +
-          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über OpenAI Whisper &amp; wird anschließend automatisch geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
+          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über <strong>OpenAI Whisper</strong> (USA, Auftragsverarbeitung) und wird anschließend von gpt-4o-mini geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern. Die Audiodatei wird nach der Transkription verworfen. Details in der <a href="/datenschutz.html" class="underline hover:text-white/75">Datenschutzerklärung</a>.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
         '</div>' +
         '<p class="text-xs text-white/55 leading-relaxed mb-5">' +
           'Hinweis: Dieser Score ist eine <strong>heuristische Orientierung</strong>, keine belastbare Prognose. Wir kalibrieren den Rechner laufend anhand echter Fälle. Die individuelle Prüfung durch uns kann deutlich abweichen — meistens im positiven Sinne, weil Details in den Score (noch) nicht einfließen.' +
@@ -1205,9 +1205,13 @@
         <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
       </summary>
       <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed">
-        Deine Daten werden ausschließlich auf Servern in Deutschland verarbeitet, DSGVO-konform
-        verschlüsselt gespeichert und niemals an Dritte verkauft. Für die Bearbeitung deines Falls
-        werden Daten nur an den Versicherer und ggf. den eingeschalteten Fachanwalt weitergegeben.
+        Deine Angaben werden <strong>nicht lokal gespeichert</strong> — der Schadenrechner läuft komplett im Browser.
+        Die Website liegt auf GitHub Pages (USA) und wird durch Cloudflare (global) ausgeliefert. Sprachaufnahmen,
+        die du über das Mikrofon-Feld einsprichst, werden zur Transkription an <strong>OpenAI Whisper</strong>
+        (USA, mit Auftragsverarbeitungsvertrag) übertragen und anschließend verworfen.
+        Alles DSGVO-konform geregelt, Details in unserer <a href="/datenschutz.html" class="text-tertiary font-semibold hover:underline">Datenschutzerklärung</a>.
+        Für die eigentliche Fallbearbeitung (sobald wir live sind) werden Daten nur an den Versicherer und ggf.
+        den eingeschalteten Fachanwalt weitergegeben und niemals an Dritte verkauft.
       </div>
     </details>
 
