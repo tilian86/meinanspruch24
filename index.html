@@ -778,7 +778,7 @@
     }
 
     if (isFinal) {
-      var voiceSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+      var voiceSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== 'undefined');
       html +=
         '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 mb-5">' +
           '<label for="sr-desc" class="text-sm font-bold text-white block mb-1">Fallbeschreibung <span class="text-white/50 font-normal">(optional)</span></label>' +
@@ -792,7 +792,7 @@
               : '') +
           '</div>' +
           '<div id="sr-mic-status" class="text-xs text-white/65 mt-2 hidden"></div>' +
-          (voiceSupported ? '' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt Sprach-Eingabe nicht — iOS Safari und Chrome können es.</div>') +
+          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über OpenAI Whisper — deutsche Fachbegriffe werden in der Regel sauber transkribiert.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
         '</div>' +
         '<p class="text-xs text-white/55 leading-relaxed mb-5">' +
           'Hinweis: Dieser Score ist eine <strong>heuristische Orientierung</strong>, keine belastbare Prognose. Wir kalibrieren den Rechner laufend anhand echter Fälle. Die individuelle Prüfung durch uns kann deutlich abweichen — meistens im positiven Sinne, weil Details in den Score (noch) nicht einfließen.' +
@@ -835,66 +835,135 @@
       window.location.href = mailto;
     });
 
-    // Voice input setup (Web Speech API)
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // Voice input setup (MediaRecorder → Cloudflare Worker → OpenAI Whisper)
     var micBtn = document.getElementById('sr-mic');
     var descField = document.getElementById('sr-desc');
     var micStatus = document.getElementById('sr-mic-status');
-    var recognition = null;
-    var listening = false;
-    var finalText = '';
+    var TRANSCRIBE_URL = 'https://meinanspruch24-transcribe.florian-s-thiel.workers.dev/';
+    var mediaRecorder = null;
+    var audioStream = null;
+    var audioChunks = [];
+    var recordingState = 'idle'; // idle | recording | transcribing
+    var recordStart = 0;
+    var maxMs = 90000; // 90s Limit
+    var autoStopTimer = null;
+
+    function setMic(state, msg) {
+      recordingState = state;
+      if (state === 'recording') {
+        micBtn.classList.remove('bg-white/20');
+        micBtn.classList.add('bg-red-500', 'animate-pulse');
+        micBtn.innerHTML = '<span class="material-symbols-outlined text-base">stop</span>';
+      } else if (state === 'transcribing') {
+        micBtn.classList.remove('bg-red-500', 'animate-pulse');
+        micBtn.classList.add('bg-white/20');
+        micBtn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">progress_activity</span>';
+        micBtn.disabled = true;
+      } else {
+        micBtn.classList.remove('bg-red-500', 'animate-pulse');
+        micBtn.classList.add('bg-white/20');
+        micBtn.innerHTML = '<span class="material-symbols-outlined text-base">mic</span>';
+        micBtn.disabled = false;
+      }
+      if (msg) { micStatus.textContent = msg; micStatus.classList.remove('hidden'); }
+    }
+
+    function cleanupStream() {
+      if (audioStream) { audioStream.getTracks().forEach(function(t){ t.stop(); }); audioStream = null; }
+      if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
+    }
+
+    async function startRecording() {
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (e) {
+        setMic('idle', e.name === 'NotAllowedError'
+          ? 'Mikrofon-Zugriff wurde verweigert. Erlaubnis in den Browser-Einstellungen setzen und nochmal.'
+          : 'Mikrofon nicht verfügbar: ' + (e.message || e.name));
+        return;
+      }
+
+      var mime = 'audio/webm;codecs=opus';
+      if (typeof MediaRecorder === 'undefined') {
+        setMic('idle', 'Dein Browser unterstützt Sprachaufnahme nicht — tippe einfach.');
+        cleanupStream();
+        return;
+      }
+      if (!MediaRecorder.isTypeSupported(mime)) {
+        mime = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+      }
+      try {
+        mediaRecorder = mime ? new MediaRecorder(audioStream, { mimeType: mime }) : new MediaRecorder(audioStream);
+      } catch (e) {
+        setMic('idle', 'Aufnahme konnte nicht gestartet werden: ' + (e.message || e.name));
+        cleanupStream();
+        return;
+      }
+      audioChunks = [];
+      mediaRecorder.ondataavailable = function(ev) { if (ev.data && ev.data.size > 0) audioChunks.push(ev.data); };
+      mediaRecorder.onstop = onRecordingStopped;
+      mediaRecorder.start();
+      recordStart = Date.now();
+      setMic('recording', 'Ich nehme auf — sprich einfach los. Nochmal auf's Icon zum Stoppen.');
+      autoStopTimer = setTimeout(function() {
+        if (recordingState === 'recording') {
+          setMic('recording', 'Maximum 90 Sekunden erreicht — beende die Aufnahme.');
+          mediaRecorder.stop();
+        }
+      }, maxMs);
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+    }
+
+    async function onRecordingStopped() {
+      cleanupStream();
+      var duration = Date.now() - recordStart;
+      if (duration < 600 || audioChunks.length === 0) {
+        setMic('idle', 'Aufnahme war zu kurz — bitte nochmal versuchen.');
+        return;
+      }
+      var blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      audioChunks = [];
+      setMic('transcribing', 'Transkribiere mit OpenAI Whisper …');
+
+      try {
+        var resp = await fetch(TRANSCRIBE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': blob.type || 'audio/webm' },
+          body: blob,
+        });
+        var data = await resp.json();
+        if (!resp.ok) {
+          setMic('idle', 'Transkription fehlgeschlagen: ' + (data.error || resp.status));
+          return;
+        }
+        var text = (data.text || '').trim();
+        if (!text) {
+          setMic('idle', 'Keine Worte erkannt — nochmal, bitte etwas deutlicher.');
+          return;
+        }
+        var current = descField.value ? descField.value.replace(/\s+$/, '') + ' ' : '';
+        descField.value = current + text;
+        state.answers.description = descField.value;
+        setMic('idle', 'Transkribiert ✓ — du kannst weiter diktieren oder tippen.');
+        setTimeout(function() { micStatus.classList.add('hidden'); }, 2500);
+      } catch (e) {
+        setMic('idle', 'Netzwerkfehler bei der Transkription: ' + (e.message || e));
+      }
+    }
 
     if (descField) {
       descField.addEventListener('input', function() { state.answers.description = descField.value; });
     }
 
-    if (SR && micBtn && descField) {
+    if (micBtn && descField && navigator.mediaDevices && typeof MediaRecorder !== 'undefined') {
       micBtn.addEventListener('click', function() {
-        if (listening && recognition) { recognition.stop(); return; }
-        try {
-          recognition = new SR();
-          recognition.lang = 'de-DE';
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          finalText = descField.value ? (descField.value.replace(/\s+$/, '') + ' ') : '';
-
-          recognition.onstart = function() {
-            listening = true;
-            micBtn.classList.remove('bg-white/20');
-            micBtn.classList.add('bg-red-500', 'animate-pulse');
-            micBtn.innerHTML = '<span class="material-symbols-outlined text-base">stop</span>';
-            micStatus.textContent = 'Ich höre zu — sprich einfach los. Nochmal auf das Icon, wenn du fertig bist.';
-            micStatus.classList.remove('hidden');
-          };
-          recognition.onresult = function(event) {
-            var interim = '';
-            for (var i = event.resultIndex; i < event.results.length; i++) {
-              var t = event.results[i][0].transcript;
-              if (event.results[i].isFinal) finalText += t + ' ';
-              else interim += t;
-            }
-            descField.value = finalText + interim;
-            state.answers.description = descField.value;
-          };
-          recognition.onerror = function(event) {
-            micStatus.textContent = event.error === 'not-allowed'
-              ? 'Mikrofon-Zugriff wurde verweigert. Erlaubnis in den Browser-Einstellungen setzen und erneut probieren.'
-              : (event.error === 'no-speech' ? 'Nichts gehört — versuch es nochmal.' : 'Transkriptionsfehler: ' + event.error);
-            micStatus.classList.remove('hidden');
-          };
-          recognition.onend = function() {
-            listening = false;
-            micBtn.classList.remove('bg-red-500', 'animate-pulse');
-            micBtn.classList.add('bg-white/20');
-            micBtn.innerHTML = '<span class="material-symbols-outlined text-base">mic</span>';
-            setTimeout(function() { if (!listening) micStatus.classList.add('hidden'); }, 2200);
-          };
-
-          recognition.start();
-        } catch (e) {
-          micStatus.textContent = 'Sprach-Eingabe konnte nicht gestartet werden: ' + (e.message || e);
-          micStatus.classList.remove('hidden');
-        }
+        if (recordingState === 'recording') stopRecording();
+        else if (recordingState === 'idle') startRecording();
       });
     }
   }
