@@ -112,7 +112,7 @@
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
   body { font-family: 'Manrope', sans-serif; background-color: #f7f9fb; color: #191c1e; -webkit-font-smoothing: antialiased; }
   h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.015em; }
-  .glass-nav { background: rgba(247, 249, 251, 0.78); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
+  .glass-nav { background: rgba(226, 232, 240, 0.78); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(11, 35, 48, 0.06); }
   .label-md { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: 0.72rem; }
   .reading-width { max-width: 640px; }
 
@@ -156,9 +156,11 @@
 
 <!-- ────────────────────────  NAV  ──────────────────────── -->
 <nav class="fixed top-[40px] sm:top-[36px] inset-x-0 z-50 glass-nav">
-  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 lg:px-8 py-3.5">
-    <a href="#" class="flex items-center tracking-tight" aria-label="MeinAnspruch24 Startseite">
-      <img src="/assets/logo-brand.jpg" alt="MeinAnspruch24 — Digitale Versicherungs-Regulierung" class="h-10 w-auto" />
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 lg:px-8 py-3">
+    <a href="/" class="flex items-center tracking-tight -my-1" aria-label="MeinAnspruch24 Startseite">
+      <img src="/assets/logo-brand.jpg"
+           alt="MeinAnspruch24 — Digitale Versicherungs-Regulierung, 100% erfolgsbasiert"
+           class="h-14 sm:h-16 w-auto rounded-lg" />
     </a>
     <div class="hidden md:flex items-center gap-8">
       <a href="#so-funktionierts" class="label-md text-on-surface-variant hover:text-tertiary transition-colors">So funktioniert's</a>
@@ -174,7 +176,7 @@
   </div>
 </nav>
 
-<main class="pt-[132px]">
+<main class="pt-[140px] sm:pt-[148px]">
 
 <!-- ────────────────────────  HERO  ──────────────────────── -->
 <section class="relative px-6 lg:px-8 pt-12 pb-20 lg:pb-28 max-w-7xl mx-auto">
@@ -760,8 +762,13 @@
   <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10">
 
     <div class="md:col-span-5">
-      <a href="#" class="inline-flex items-center mb-4">
-        <img src="/assets/logo-light.svg" alt="MeinAnspruch24" class="h-9 w-auto" />
+      <a href="/" class="inline-flex flex-col items-start mb-5" aria-label="MeinAnspruch24 Startseite">
+        <span class="text-3xl font-extrabold tracking-tight leading-none">
+          MeinAnspruch<span style="color:#f47935">24</span>
+        </span>
+        <span class="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/55 font-semibold">
+          Digitale Versicherungs-Regulierung · <span class="text-[#f47935]">100% Erfolgsbasiert</span>
+        </span>
       </a>
       <p class="text-white/70 text-sm leading-relaxed max-w-md">
         Wir setzen Versicherungs­ansprüche durch — auf Erfolgsbasis, voll digital, ohne Risiko für dich.
@@ -797,10 +804,10 @@
     <div class="md:col-span-3">
       <h4 class="font-bold mb-4 text-sm label-md">Rechtliches</h4>
       <div class="flex flex-col gap-2 text-sm text-white/70">
-        <a class="hover:text-white transition-colors" href="#">Impressum</a>
-        <a class="hover:text-white transition-colors" href="#">Datenschutz</a>
-        <a class="hover:text-white transition-colors" href="#">AGB</a>
-        <a class="hover:text-white transition-colors" href="#">Widerruf</a>
+        <a class="hover:text-white transition-colors" href="/impressum.html">Impressum</a>
+        <a class="hover:text-white transition-colors" href="/datenschutz.html">Datenschutz</a>
+        <a class="hover:text-white transition-colors" href="/agb.html">AGB</a>
+        <a class="hover:text-white transition-colors" href="/widerruf.html">Widerruf</a>
       </div>
     </div>
 
