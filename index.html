@@ -143,6 +143,7 @@
 
   details > summary { list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
+  html, body { overflow-x: clip; max-width: 100vw; }
 </style>
 </head>
 
@@ -161,7 +162,7 @@
     <a href="/" class="flex items-center tracking-tight -my-1" aria-label="MeinAnspruch24 Startseite">
       <img src="/assets/logo-brand.jpg"
            alt="MeinAnspruch24 — Digitale Versicherungs-Regulierung, 100% erfolgsbasiert"
-           class="h-14 sm:h-16 w-auto rounded-lg" />
+           class="h-16 sm:h-20 w-auto rounded-lg" />
     </a>
     <div class="hidden md:flex items-center gap-8">
       <a href="#so-funktionierts" class="label-md text-on-surface-variant hover:text-tertiary transition-colors">So funktioniert's</a>
@@ -177,7 +178,7 @@
   </div>
 </nav>
 
-<main class="pt-[108px] sm:pt-[148px]">
+<main class="pt-[120px] sm:pt-[156px]">
 
 <!-- ────────────────────────  HERO  ──────────────────────── -->
 <section class="relative px-6 lg:px-8 pt-12 pb-20 lg:pb-28 max-w-7xl mx-auto">
@@ -606,53 +607,327 @@
 </section>
 
 
-<!-- ────────────────────────  SCHADENRECHNER TEASER  ──────────────────────── -->
+<!-- ────────────────────────  SCHADENRECHNER  ──────────────────────── -->
 <section id="schadenrechner" class="py-24 px-6 lg:px-8">
-  <div class="max-w-5xl mx-auto bg-surface-container-lowest rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_-30px_rgba(0,70,95,0.25)] grid grid-cols-1 lg:grid-cols-2">
+  <div class="max-w-5xl mx-auto mb-10 text-center">
+    <div class="label-md text-tertiary mb-3">Schaden­rechner</div>
+    <h2 class="text-3xl lg:text-4xl font-bold text-primary mb-4 leading-tight">In 2 Minuten zu deiner Erfolgs­einschätzung</h2>
+    <p class="text-on-surface-variant leading-relaxed max-w-2xl mx-auto">
+      Fünf Fragen, sofort ein Score von 0–100 plus geschätzte Auszahlung. Keine Registrierung,
+      keine Datenspeicherung — alles läuft in deinem Browser.
+    </p>
+  </div>
 
-    <div class="p-10 lg:p-14">
-      <div class="label-md text-tertiary mb-3">Schaden­rechner</div>
-      <h2 class="text-3xl lg:text-4xl font-bold text-primary mb-4 leading-tight">In 2 Minuten zu deiner Erfolgs­einschätzung</h2>
-      <p class="text-on-surface-variant leading-relaxed mb-8">
-        Beantworte fünf einfache Fragen zu deinem Fall — du erhältst sofort eine Score-basierte
-        Einschätzung der Erfolgsaussichten und einer realistischen Schadensumme.
-      </p>
+  <div class="max-w-5xl mx-auto bg-surface-container-lowest rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_-30px_rgba(0,70,95,0.25)] grid grid-cols-1 lg:grid-cols-2">
 
-      <ul class="space-y-3 mb-10 text-sm text-on-surface-variant">
-        <li class="flex gap-3"><span class="material-symbols-outlined text-tertiary">timer</span> Dauert ca. 2 Minuten</li>
-        <li class="flex gap-3"><span class="material-symbols-outlined text-tertiary">lock</span> Daten bleiben bei dir bis zur Beauftragung</li>
-        <li class="flex gap-3"><span class="material-symbols-outlined text-tertiary">euro_symbol</span> Komplett kostenlos &amp; unverbindlich</li>
-      </ul>
-
-      <a href="#"
-         class="inline-flex items-center gap-2 bg-tertiary text-on-tertiary px-7 py-4 rounded-xl font-bold hover:bg-tertiary-container hover:shadow-lg transition-all">
-        Schadenrechner starten
-        <span class="material-symbols-outlined">arrow_forward</span>
-      </a>
-    </div>
-
-    <div class="grad-primary p-10 lg:p-14 text-white relative overflow-hidden">
-      <div class="absolute -top-10 -right-10 w-64 h-64 bg-tertiary-fixed/20 rounded-full blur-3xl"></div>
-
-      <div class="relative z-10">
-        <div class="label-md text-tertiary-fixed mb-3">Beispiel-Ergebnis</div>
-        <div class="text-6xl font-extrabold mb-2">82<span class="text-3xl">/100</span></div>
-        <div class="text-lg font-semibold mb-8">Hohe Erfolgsaussicht</div>
-
-        <div class="space-y-4 text-sm">
-          <div class="flex justify-between"><span class="opacity-80">Geschätzte Forderung</span><span class="font-bold">14.600 € / Jahr</span></div>
-          <div class="flex justify-between"><span class="opacity-80">Empfohlene Stufe</span><span class="font-bold">Außergerichtlich</span></div>
-          <div class="flex justify-between"><span class="opacity-80">Provision (geschätzt)</span><span class="font-bold">22 %</span></div>
-          <div class="border-t border-white/10 pt-4 mt-4 flex justify-between text-base">
-            <span class="font-semibold">Deine Auszahlung (Ø)</span>
-            <span class="font-extrabold text-tertiary-fixed">≈ 11.388 € / Jahr</span>
-          </div>
+    <!-- FORM -->
+    <div class="p-6 sm:p-10 lg:p-12">
+      <div class="mb-6">
+        <div class="flex items-center justify-between text-xs font-semibold text-on-surface-variant mb-2">
+          <span>Frage <span id="sr-step">1</span> von <span id="sr-total">5</span></span>
+          <span id="sr-progress-label">20 %</span>
+        </div>
+        <div class="h-1.5 bg-surface-container rounded-full overflow-hidden">
+          <div id="sr-progress" class="h-full bg-tertiary rounded-full transition-all duration-500 ease-out" style="width:20%"></div>
         </div>
       </div>
+
+      <div id="sr-questions" class="min-h-[340px]"></div>
+
+      <div class="mt-6 flex gap-3 items-center">
+        <button id="sr-back" type="button" class="hidden inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-primary hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>Zurück
+        </button>
+        <button id="sr-next" type="button" class="ml-auto inline-flex items-center gap-2 bg-tertiary text-on-tertiary px-6 py-3 rounded-xl font-bold text-sm hover:bg-tertiary-container disabled:opacity-40 disabled:pointer-events-none transition-all" disabled>
+          <span id="sr-next-label">Weiter</span>
+          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- LIVE-ERGEBNIS -->
+    <div class="grad-primary p-6 sm:p-10 lg:p-12 text-white relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-64 h-64 bg-tertiary-fixed/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div id="sr-result" class="relative z-10"></div>
     </div>
 
   </div>
 </section>
+
+<script>
+(function() {
+  'use strict';
+  var questions = [
+    { id: 'sparte', title: 'Um welche Versicherung geht es?', type: 'choice',
+      options: [
+        { value: 'bu',          label: 'Berufsunfähigkeit',   icon: 'health_and_safety',  score: 15, labelFull: 'Berufsunfähigkeits\u00adversicherung' },
+        { value: 'wohngebaeude',label: 'Wohngebäude',         icon: 'home_repair_service',score: 10, labelFull: 'Wohngebäudeversicherung' },
+        { value: 'kfz',         label: 'Kfz / Haftpflicht',   icon: 'directions_car',     score: 5,  labelFull: 'Kfz- bzw. Haftpflichtversicherung' },
+        { value: 'hausrat',     label: 'Hausrat',             icon: 'inventory_2',        score: 5,  labelFull: 'Hausratversicherung' },
+        { value: 'andere',      label: 'Andere Sparte',       icon: 'category',           score: 0,  labelFull: 'andere Versicherungssparte' }
+      ] },
+    { id: 'situation', title: 'Wie ist der Stand?', type: 'choice',
+      options: [
+        { value: 'ablehnung',  label: 'Versicherer hat abgelehnt oder gekürzt',        icon: 'block',         score: 20 },
+        { value: 'verzoegert', label: 'Versicherer reagiert verzögert oder gar nicht', icon: 'hourglass_top', score: 10 },
+        { value: 'vorab',      label: 'Noch nichts gemeldet – brauche Einschätzung',    icon: 'lightbulb',     score: 0 }
+      ] },
+    { id: 'hoehe', title: 'Geschätzte Schadens- oder Forderungshöhe', type: 'range',
+      hint: 'Grober Schätzwert – verfeinern kannst du später.',
+      presets: [2500, 10000, 25000, 75000, 150000] },
+    { id: 'zeit', title: 'Wann ist der Vorfall passiert?', type: 'choice',
+      options: [
+        { value: 'neu',     label: 'In den letzten 6 Monaten', icon: 'today',          score: 15 },
+        { value: 'juengst', label: 'Vor 6–12 Monaten',         icon: 'calendar_month', score: 10 },
+        { value: 'mittel',  label: 'Vor 1–3 Jahren',           icon: 'event',          score: 0 },
+        { value: 'alt',     label: 'Länger als 3 Jahre her',   icon: 'history',        score: -20 }
+      ] },
+    { id: 'rechtsschutz', title: 'Hast du eine Rechtsschutz\u00adversicherung?', type: 'choice',
+      options: [
+        { value: 'ja',          label: 'Ja, mit passendem Baustein', icon: 'shield_person', score: 15 },
+        { value: 'weiss_nicht', label: 'Unsicher',                   icon: 'help',          score: 5 },
+        { value: 'nein',        label: 'Nein',                       icon: 'no_accounts',   score: 0 }
+      ] }
+  ];
+
+  var state = { step: 0, answers: {}, done: false };
+  var total = questions.length;
+  document.getElementById('sr-total').textContent = total;
+
+  var euro = function(n) { return Math.round(n || 0).toLocaleString('de-DE'); };
+
+  function calc() {
+    var score = 50;
+    var hoehe = Number(state.answers.hoehe || 0);
+    questions.forEach(function(q) {
+      var a = state.answers[q.id];
+      if (q.type === 'choice' && a) {
+        var opt = q.options.find(function(o) { return o.value === a; });
+        if (opt) score += opt.score;
+      }
+    });
+    if (hoehe && hoehe < 1000) score -= 10;
+    else if (hoehe >= 5000 && hoehe < 50000) score += 10;
+    else if (hoehe >= 50000) score += 5;
+    score = Math.max(0, Math.min(100, score));
+
+    var tier, tierLabel, tierText, tierColor;
+    if (score >= 70) { tier = 'high'; tierLabel = 'Hohe Erfolgsaussicht'; tierText = 'Dein Fall hat sehr gute Chancen — einreichen lohnt sich.'; tierColor = '#4edea3'; }
+    else if (score >= 50) { tier = 'med'; tierLabel = 'Solide Ausgangslage'; tierText = 'Detailprüfung erforderlich, aber der Fall ist interessant.'; tierColor = '#fde68a'; }
+    else if (score >= 30) { tier = 'low'; tierLabel = 'Grenzfall'; tierText = 'Individuelle Einschätzung durch uns sinnvoll — Ergebnis offen.'; tierColor = '#f4a93c'; }
+    else { tier = 'none'; tierLabel = 'Aussichten schwach'; tierText = 'Wir übernehmen solche Fälle nur selten — frag uns aber gern.'; tierColor = '#fda4af'; }
+
+    var sit = state.answers.situation;
+    var stufe = 'Stufe 1 · Schadenabwicklung';
+    if (sit === 'ablehnung' || sit === 'verzoegert') stufe = 'Stufe 2 · Außergerichtlich';
+    if (state.answers.rechtsschutz === 'ja' && sit === 'ablehnung' && hoehe >= 10000) stufe = 'Stufe 2/3 · je nach Reaktion';
+    var provPct = stufe.indexOf('Stufe 1') === 0 ? 12 : (stufe.indexOf('Stufe 2/3') === 0 ? 25 : 22);
+
+    var durchgesetzt = hoehe * (score / 100);
+    var provision   = durchgesetzt * (provPct / 100);
+    var auszahlung  = Math.max(0, durchgesetzt - provision);
+
+    return { score: score, tier: tier, tierLabel: tierLabel, tierText: tierText, tierColor: tierColor,
+             stufe: stufe, provPct: provPct, hoehe: hoehe, durchgesetzt: durchgesetzt, auszahlung: auszahlung };
+  }
+
+  function renderResultPanel() {
+    var r = calc();
+    var el = document.getElementById('sr-result');
+    var hasHoehe = !!state.answers.hoehe;
+    var answeredCount = Object.keys(state.answers).filter(function(k) {
+      return state.answers[k] !== undefined && state.answers[k] !== null && state.answers[k] !== '';
+    }).length;
+    var isFinal = state.done;
+
+    if (!isFinal && answeredCount === 0) {
+      el.innerHTML =
+        '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Live-Einschätzung</div>' +
+        '<div class="flex items-baseline gap-3 mb-2"><div class="text-6xl font-extrabold opacity-40">–</div><div class="text-xl opacity-60">/100</div></div>' +
+        '<div class="text-lg font-semibold mb-6 opacity-70">Warte auf deine Antworten …</div>' +
+        '<div class="bg-white/5 rounded-2xl p-5 text-sm text-white/60 leading-relaxed">' +
+          'Sobald du die erste Frage beantwortet hast, aktualisiert sich die Einschätzung in Echtzeit. Am Ende gibt es eine konkrete Schätzung, was für deinen Fall realistisch drin ist.' +
+        '</div>';
+      return;
+    }
+
+    var head = isFinal
+      ? '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Dein Ergebnis</div>'
+      : '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Live-Einschätzung · aktualisiert sich</div>';
+
+    var html = head +
+      '<div class="flex items-baseline gap-3 mb-1"><div class="text-6xl sm:text-7xl font-extrabold">' + r.score + '</div><div class="text-xl opacity-80">/100</div></div>' +
+      '<div class="text-xl sm:text-2xl font-bold mb-3" style="color:' + r.tierColor + '">' + r.tierLabel + '</div>' +
+      '<p class="text-white/80 text-sm leading-relaxed mb-6">' + r.tierText + '</p>';
+
+    if (hasHoehe) {
+      html +=
+        '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 space-y-3 text-sm mb-5">' +
+          '<div class="flex justify-between gap-3"><span class="opacity-80">Angenommene Forderung</span><span class="font-bold whitespace-nowrap">' + euro(r.hoehe) + ' €</span></div>' +
+          '<div class="flex justify-between gap-3"><span class="opacity-80">Empfohlene Stufe</span><span class="font-bold text-right">' + r.stufe + '</span></div>' +
+          '<div class="flex justify-between gap-3"><span class="opacity-80">Provision (geschätzt)</span><span class="font-bold">' + r.provPct + ' %</span></div>' +
+          '<div class="border-t border-white/15 pt-3 mt-3 flex justify-between gap-3 items-center">' +
+            '<span class="font-semibold">Deine Auszahlung (Ø)</span>' +
+            '<span class="font-extrabold text-lg whitespace-nowrap" style="color:' + r.tierColor + '">≈ ' + euro(r.auszahlung) + ' €</span>' +
+          '</div>' +
+        '</div>';
+    }
+
+    if (isFinal) {
+      var sparteLbl = (questions[0].options.find(function(o) { return o.value === state.answers.sparte; }) || {}).labelFull || '–';
+      var sitLbl    = (questions[1].options.find(function(o) { return o.value === state.answers.situation; }) || {}).label || '–';
+      var zeitLbl   = (questions[3].options.find(function(o) { return o.value === state.answers.zeit; }) || {}).label || '–';
+      var rsLbl     = (questions[4].options.find(function(o) { return o.value === state.answers.rechtsschutz; }) || {}).label || '–';
+
+      var body = 'Hallo MeinAnspruch24-Team,\n\nich habe den Schadenrechner durchlaufen und möchte meinen Fall einreichen:\n\n' +
+        '• Sparte: ' + sparteLbl + '\n' +
+        '• Situation: ' + sitLbl + '\n' +
+        '• Streitwert: ' + euro(r.hoehe) + ' €\n' +
+        '• Zeit seit Vorfall: ' + zeitLbl + '\n' +
+        '• Rechtsschutz: ' + rsLbl + '\n' +
+        '• Score: ' + r.score + '/100 (' + r.tierLabel + ')\n' +
+        '• Empfohlene Stufe laut Rechner: ' + r.stufe + '\n\n' +
+        'Bitte meldet euch für die Detailprüfung.\n\nName:\nTelefon:\nAnmerkungen:\n';
+
+      var mailto = 'mailto:kontakt@meinanspruch24.de?subject=' + encodeURIComponent('Neuer Fall · Score ' + r.score) + '&body=' + encodeURIComponent(body);
+
+      html +=
+        '<p class="text-xs text-white/55 leading-relaxed mb-5">' +
+          'Richtwert basiert auf branchentypischen Quoten. Eine individuelle Prüfung kann deutlich abweichen — meistens im positiven Sinne, weil wir Details berücksichtigen, die der Rechner nicht kennt.' +
+        '</p>' +
+        '<a href="' + mailto + '" class="inline-flex items-center justify-center gap-2 w-full bg-tertiary text-on-tertiary px-6 py-4 rounded-xl font-extrabold text-base hover:bg-tertiary-container hover:shadow-lg transition-all">' +
+          '<span class="material-symbols-outlined">send</span>Fall jetzt per Mail einreichen' +
+        '</a>' +
+        '<button id="sr-restart" type="button" class="mt-3 w-full px-5 py-2.5 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/10 transition-all">Neu berechnen</button>';
+    } else if (!hasHoehe) {
+      html += '<div class="bg-white/5 rounded-2xl p-4 text-xs text-white/60 leading-relaxed">Geschätzte Auszahlung erscheint, sobald du die Forderungshöhe angegeben hast.</div>';
+    }
+
+    el.innerHTML = html;
+
+    var restart = document.getElementById('sr-restart');
+    if (restart) restart.addEventListener('click', function() {
+      state = { step: 0, answers: {}, done: false };
+      render();
+    });
+  }
+
+  function renderQuestion() {
+    var q = questions[state.step];
+    var container = document.getElementById('sr-questions');
+    var nextBtn = document.getElementById('sr-next');
+    var backBtn = document.getElementById('sr-back');
+
+    if (!q || state.done) {
+      container.innerHTML =
+        '<div class="p-6 sm:p-8 rounded-2xl bg-tertiary-container text-on-tertiary-container">' +
+          '<div class="flex items-center gap-3 mb-2"><span class="material-symbols-outlined text-2xl" style="font-variation-settings:\'FILL\' 1;">verified</span><div class="font-bold text-lg">Einschätzung fertig!</div></div>' +
+          '<p class="text-sm leading-relaxed">Dein Ergebnis siehst du rechts (bzw. unterhalb auf dem Handy). Über den Button „Fall einreichen" gehen deine Angaben direkt per Mail an uns.</p>' +
+        '</div>';
+      nextBtn.style.display = 'none';
+      backBtn.classList.remove('hidden');
+      return;
+    }
+
+    if (q.type === 'choice') {
+      var opts = q.options.map(function(o) {
+        var active = state.answers[q.id] === o.value;
+        return '<button type="button" data-value="' + o.value + '" class="sr-opt w-full flex items-center gap-3 p-3.5 rounded-xl border-2 ' +
+               (active ? 'border-tertiary bg-tertiary/5' : 'border-transparent bg-surface-container-low hover:bg-surface-container') +
+               ' transition-all text-left">' +
+                 '<span class="w-10 h-10 rounded-xl ' + (active ? 'bg-tertiary text-on-tertiary' : 'bg-secondary-fixed text-primary') + ' flex items-center justify-center shrink-0 transition-colors">' +
+                   '<span class="material-symbols-outlined text-lg" style="font-variation-settings:\'FILL\' 1;">' + o.icon + '</span>' +
+                 '</span>' +
+                 '<span class="font-semibold text-primary flex-1">' + o.label + '</span>' +
+                 (active ? '<span class="material-symbols-outlined text-tertiary shrink-0" style="font-variation-settings:\'FILL\' 1;">check_circle</span>' : '') +
+               '</button>';
+      }).join('');
+
+      container.innerHTML =
+        '<h3 class="text-lg sm:text-xl font-bold text-primary mb-4">' + q.title + '</h3>' +
+        '<div class="space-y-2.5">' + opts + '</div>';
+
+      Array.prototype.forEach.call(container.querySelectorAll('.sr-opt'), function(btn) {
+        btn.addEventListener('click', function() {
+          state.answers[q.id] = btn.dataset.value;
+          renderQuestion();
+          renderResultPanel();
+          setTimeout(function() {
+            if (state.step < total - 1) { state.step++; render(); }
+            else { state.done = true; render(); }
+          }, 280);
+        });
+      });
+    }
+
+    if (q.type === 'range') {
+      var cur = Number(state.answers.hoehe) || 10000;
+      var presetsHtml = q.presets.map(function(p) {
+        var active = cur === p;
+        var lbl = p >= 1000 ? (p / 1000).toLocaleString('de-DE') + 'k €' : p + ' €';
+        return '<button type="button" data-value="' + p + '" class="sr-preset px-2 py-2 rounded-lg text-xs font-bold ' +
+               (active ? 'bg-tertiary text-on-tertiary' : 'bg-surface-container-low text-primary hover:bg-surface-container') +
+               ' transition-colors">' + lbl + '</button>';
+      }).join('');
+
+      container.innerHTML =
+        '<h3 class="text-lg sm:text-xl font-bold text-primary mb-1.5">' + q.title + '</h3>' +
+        '<p class="text-sm text-on-surface-variant mb-6">' + (q.hint || '') + '</p>' +
+        '<div class="text-center mb-5">' +
+          '<div class="text-4xl sm:text-5xl font-extrabold text-primary leading-tight"><span id="sr-hoehe-display">' + cur.toLocaleString('de-DE') + '</span> <span class="text-2xl opacity-70">€</span></div>' +
+        '</div>' +
+        '<input type="range" id="sr-hoehe-slider" min="500" max="300000" step="500" value="' + cur + '" class="w-full accent-tertiary cursor-pointer mb-5">' +
+        '<div class="text-xs text-on-surface-variant text-center mb-3">Kurzwahl:</div>' +
+        '<div class="grid grid-cols-5 gap-2">' + presetsHtml + '</div>';
+
+      state.answers.hoehe = cur;
+      var display = document.getElementById('sr-hoehe-display');
+      var slider  = document.getElementById('sr-hoehe-slider');
+      slider.addEventListener('input', function() {
+        state.answers.hoehe = Number(slider.value);
+        display.textContent = state.answers.hoehe.toLocaleString('de-DE');
+        renderResultPanel();
+      });
+      Array.prototype.forEach.call(container.querySelectorAll('.sr-preset'), function(btn) {
+        btn.addEventListener('click', function() {
+          state.answers.hoehe = Number(btn.dataset.value);
+          renderQuestion();
+          renderResultPanel();
+        });
+      });
+    }
+
+    var pct = Math.round(((state.step + 1) / total) * 100);
+    document.getElementById('sr-step').textContent = state.step + 1;
+    document.getElementById('sr-progress').style.width = pct + '%';
+    document.getElementById('sr-progress-label').textContent = pct + ' %';
+
+    nextBtn.style.display = '';
+    var answered = q.type === 'range' ? !!state.answers.hoehe : !!state.answers[q.id];
+    nextBtn.disabled = !answered;
+    document.getElementById('sr-next-label').textContent = (state.step === total - 1) ? 'Einschätzung anzeigen' : 'Weiter';
+    backBtn.classList.toggle('hidden', state.step === 0);
+  }
+
+  function render() { renderQuestion(); renderResultPanel(); }
+
+  document.getElementById('sr-next').addEventListener('click', function() {
+    var q = questions[state.step];
+    if (!q) return;
+    var answered = q.type === 'range' ? !!state.answers.hoehe : !!state.answers[q.id];
+    if (!answered) return;
+    if (state.step < total - 1) state.step++;
+    else state.done = true;
+    render();
+  });
+  document.getElementById('sr-back').addEventListener('click', function() {
+    if (state.done) { state.done = false; state.step = total - 1; render(); return; }
+    if (state.step > 0) { state.step--; render(); }
+  });
+
+  render();
+})();
+</script>
 
 
 <!-- ────────────────────────  FAQ  ──────────────────────── -->
