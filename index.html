@@ -687,11 +687,14 @@
         { value: 'hausrat',     label: 'Hausrat',             icon: 'inventory_2',        score: 5,  labelFull: 'Hausratversicherung' },
         { value: 'andere',      label: 'Andere Sparte',       icon: 'category',           score: 0,  labelFull: 'andere Versicherungssparte' }
       ] },
-    { id: 'situation', title: 'Wie ist der Stand?', type: 'choice',
+    { id: 'situation', title: 'Wie ist der aktuelle Stand?', type: 'choice',
       options: [
-        { value: 'ablehnung',  label: 'Versicherer hat abgelehnt oder gekürzt',        icon: 'block',         score: 20 },
-        { value: 'verzoegert', label: 'Versicherer reagiert verzögert oder gar nicht', icon: 'hourglass_top', score: 10 },
-        { value: 'vorab',      label: 'Noch nichts gemeldet – brauche Einschätzung',    icon: 'lightbulb',     score: 0 }
+        { value: 'nicht_gemeldet',  label: 'Noch nicht gemeldet — brauche Vorab-Einschätzung',    icon: 'lightbulb',     score: 0 },
+        { value: 'in_bearbeitung',  label: 'Gemeldet, noch in Bearbeitung (< 4 Wochen)',          icon: 'hourglass_empty', score: 5 },
+        { value: 'keine_antwort',   label: 'Gemeldet, aber seit Wochen keine Reaktion',           icon: 'hourglass_top', score: 15 },
+        { value: 'teilzahlung',     label: 'Teilzahlung oder Kulanz — Rest ist strittig',         icon: 'price_change',  score: 18 },
+        { value: 'abgelehnt',       label: 'Schriftlich abgelehnt oder stark gekürzt',            icon: 'block',         score: 22 },
+        { value: 'widerspruch',     label: 'Widerspruch eingelegt, Sache hängt fest',             icon: 'gavel',         score: 25 }
       ] },
     { id: 'hoehe', title: 'Geschätzte Schadens- oder Forderungshöhe', type: 'range',
       hint: 'Grober Schätzwert – verfeinern kannst du später.',
@@ -711,7 +714,7 @@
       ] }
   ];
 
-  var state = { step: 0, answers: {}, done: false, skipped: false };
+  var state = { step: 0, answers: {}, done: false, skipped: false, aiAssessment: null, aiLoading: false };
   var total = questions.length;
   document.getElementById('sr-total').textContent = total;
 
@@ -739,9 +742,10 @@
     else { tier = 'none'; tierLabel = 'Aussichten schwach'; tierText = 'Wir übernehmen solche Fälle nur selten — frag uns aber gern.'; tierColor = '#fda4af'; }
 
     var sit = state.answers.situation;
+    var isDisputed = (sit === 'abgelehnt' || sit === 'keine_antwort' || sit === 'teilzahlung' || sit === 'widerspruch');
     var stufe = 'Stufe 1 · Schadenabwicklung';
-    if (sit === 'ablehnung' || sit === 'verzoegert') stufe = 'Stufe 2 · Außergerichtlich';
-    if (state.answers.rechtsschutz === 'ja' && sit === 'ablehnung' && hoehe >= 10000) stufe = 'Stufe 2/3 · je nach Reaktion';
+    if (isDisputed) stufe = 'Stufe 2 · Außergerichtlich';
+    if (state.answers.rechtsschutz === 'ja' && (sit === 'abgelehnt' || sit === 'widerspruch') && hoehe >= 10000) stufe = 'Stufe 2/3 · je nach Reaktion';
     var provPct = stufe.indexOf('Stufe 1') === 0 ? 12 : (stufe.indexOf('Stufe 2/3') === 0 ? 25 : 22);
 
     var durchgesetzt = hoehe * (score / 100);
@@ -750,6 +754,91 @@
 
     return { score: score, tier: tier, tierLabel: tierLabel, tierText: tierText, tierColor: tierColor,
              stufe: stufe, provPct: provPct, hoehe: hoehe, durchgesetzt: durchgesetzt, auszahlung: auszahlung };
+  }
+
+  function renderAIBlock() {
+    var a = state.aiAssessment;
+    if (state.aiLoading) {
+      return '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 flex items-center gap-3">' +
+               '<span class="material-symbols-outlined text-2xl animate-spin">progress_activity</span>' +
+               '<div><div class="font-bold text-white">KI analysiert deinen Fall …</div>' +
+               '<div class="text-xs text-white/60 mt-0.5">Kann 10–20 Sekunden dauern.</div></div>' +
+             '</div>';
+    }
+    if (a && a.refined_score != null) {
+      var color = a.tier === 'high' ? '#4edea3' : a.tier === 'medium' ? '#fde68a' : a.tier === 'low' ? '#f4a93c' : '#fda4af';
+      var pos = (a.key_positives || []).map(function(p){
+        return '<li class="flex gap-2 items-start"><span class="material-symbols-outlined text-base shrink-0" style="color:' + color + '; font-variation-settings:\'FILL\' 1;">check_circle</span><span>' + escapeHtml(p) + '</span></li>';
+      }).join('');
+      var risks = (a.risks || []).map(function(r){
+        return '<li class="flex gap-2 items-start"><span class="material-symbols-outlined text-base shrink-0" style="color:#fbbf24; font-variation-settings:\'FILL\' 1;">warning</span><span>' + escapeHtml(r) + '</span></li>';
+      }).join('');
+      return '<div class="bg-white/15 backdrop-blur-md rounded-2xl p-5 sm:p-6 ring-1 ring-white/15">' +
+               '<div class="flex items-center justify-between mb-3">' +
+                 '<div class="text-[0.7rem] uppercase tracking-[0.18em]" style="color:' + color + '">KI-Analyse</div>' +
+                 '<div class="flex items-baseline gap-1"><span class="text-3xl font-extrabold" style="color:' + color + '">' + a.refined_score + '</span><span class="text-sm opacity-70">/100</span></div>' +
+               '</div>' +
+               (a.tier_label ? '<div class="text-lg font-bold mb-2" style="color:' + color + '">' + escapeHtml(a.tier_label) + '</div>' : '') +
+               (a.reasoning ? '<p class="text-sm text-white/85 leading-relaxed mb-4">' + escapeHtml(a.reasoning) + '</p>' : '') +
+               (pos ? '<div class="text-xs uppercase tracking-wider text-white/60 font-bold mb-2">Positive Faktoren</div><ul class="space-y-1.5 text-sm text-white/90 mb-4">' + pos + '</ul>' : '') +
+               (risks ? '<div class="text-xs uppercase tracking-wider text-white/60 font-bold mb-2">Risiken / Aufmerksamkeit</div><ul class="space-y-1.5 text-sm text-white/90 mb-4">' + risks + '</ul>' : '') +
+               (a.suggested_stage ? '<div class="flex justify-between gap-3 pt-3 border-t border-white/15 text-sm"><span class="opacity-80">KI-Stufen-Empfehlung</span><span class="font-bold text-right">' + escapeHtml(a.suggested_stage) + '</span></div>' : '') +
+             '</div>';
+    }
+    // idle state
+    return '<button id="sr-ai-analyze" type="button" class="inline-flex items-center justify-center gap-2 w-full bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-xl font-bold text-sm transition-all ring-1 ring-white/15">' +
+             '<span class="material-symbols-outlined">neurology</span>KI-Analyse starten · ~15 Sek.' +
+           '</button>' +
+           '<p class="text-xs text-white/55 leading-relaxed mt-2">Die KI liest deine Fallbeschreibung und den Kontext, gibt einen verfeinerten Score mit Positiv-Faktoren und Risiken zurück.</p>';
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; });
+  }
+
+  async function runAIAnalysis() {
+    if (state.aiLoading) return;
+    state.aiLoading = true;
+    var block = document.getElementById('sr-ai-block');
+    if (block) block.innerHTML = renderAIBlock();
+    try {
+      var r = calc();
+      var desc = (document.getElementById('sr-desc') || {}).value || '';
+      var sparteLbl = (questions[0].options.find(function(o){ return o.value === state.answers.sparte; }) || {}).labelFull || '';
+      var sitLbl    = (questions[1].options.find(function(o){ return o.value === state.answers.situation; }) || {}).label || '';
+      var zeitLbl   = (questions[3].options.find(function(o){ return o.value === state.answers.zeit; }) || {}).label || '';
+      var rsLbl     = (questions[4].options.find(function(o){ return o.value === state.answers.rechtsschutz; }) || {}).label || '';
+      var payload = {
+        sparte: state.answers.sparte, sparte_label: sparteLbl,
+        situation: state.answers.situation, situation_label: sitLbl,
+        hoehe: state.answers.hoehe || 0,
+        zeit: state.answers.zeit, zeit_label: zeitLbl,
+        rechtsschutz: state.answers.rechtsschutz, rechtsschutz_label: rsLbl,
+        baseline_score: r.score,
+        description: desc,
+      };
+      var resp = await fetch(ASSESS_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      });
+      var data = await resp.json();
+      if (!resp.ok || typeof data.refined_score !== 'number') {
+        state.aiAssessment = null;
+        state.aiLoading = false;
+        if (block) block.innerHTML = '<div class="bg-red-500/20 border border-red-500/40 rounded-2xl p-4 text-sm text-white">KI-Analyse fehlgeschlagen: ' + escapeHtml(data.error || ('HTTP ' + resp.status)) + '. <button id="sr-ai-retry" class="underline font-semibold ml-1">Nochmal versuchen</button></div>';
+        var retry = document.getElementById('sr-ai-retry');
+        if (retry) retry.addEventListener('click', runAIAnalysis);
+        return;
+      }
+      state.aiAssessment = data;
+      state.aiLoading = false;
+      if (block) block.innerHTML = renderAIBlock();
+    } catch (e) {
+      state.aiLoading = false;
+      state.aiAssessment = null;
+      if (block) block.innerHTML = '<div class="bg-red-500/20 border border-red-500/40 rounded-2xl p-4 text-sm text-white">Netzwerk-Fehler: ' + escapeHtml(e.message || String(e)) + '. <button id="sr-ai-retry" class="underline font-semibold ml-1">Nochmal</button></div>';
+      var retry = document.getElementById('sr-ai-retry');
+      if (retry) retry.addEventListener('click', runAIAnalysis);
+    }
   }
 
   function renderResultPanel() {
@@ -817,8 +906,9 @@
           '<div id="sr-mic-status" class="text-sm text-white/75 mt-3 hidden"></div>' +
           (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über <strong>OpenAI Whisper</strong> (USA, Auftragsverarbeitung) und wird anschließend von gpt-4o-mini geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern. Die Audiodatei wird nach der Transkription verworfen. Details in der <a href="/datenschutz.html" class="underline hover:text-white/75">Datenschutzerklärung</a>.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
         '</div>' +
+        '<div id="sr-ai-block" class="mb-5">' + renderAIBlock() + '</div>' +
         '<p class="text-sm text-white/60 leading-relaxed mb-5">' +
-          'Hinweis: Dieser Score ist eine <strong>heuristische Orientierung</strong>, keine belastbare Prognose. Wir kalibrieren den Rechner laufend anhand echter Fälle. Die individuelle Prüfung durch uns kann deutlich abweichen — meistens im positiven Sinne, weil Details in den Score (noch) nicht einfließen.' +
+          'Hinweis: Der Basis-Score ist eine <strong>heuristische Orientierung</strong>, keine belastbare Prognose. Die <em>KI-Analyse</em> verfeinert das Bild anhand deiner Fallbeschreibung. Die individuelle Prüfung durch uns bleibt entscheidend — meist im positiven Sinne, weil Details nicht komplett abgedeckt sind.' +
         '</p>' +
         '<button id="sr-submit" type="button" class="inline-flex items-center justify-center gap-2 w-full bg-tertiary text-on-tertiary px-6 py-4 rounded-xl font-extrabold text-base hover:bg-tertiary-container hover:shadow-lg transition-all">' +
           '<span class="material-symbols-outlined">send</span>Fall jetzt per Mail einreichen' +
@@ -832,9 +922,12 @@
 
     var restart = document.getElementById('sr-restart');
     if (restart) restart.addEventListener('click', function() {
-      state = { step: 0, answers: {}, done: false, skipped: false };
+      state = { step: 0, answers: {}, done: false, skipped: false, aiAssessment: null, aiLoading: false };
       render();
     });
+
+    var aiBtn = document.getElementById('sr-ai-analyze');
+    if (aiBtn) aiBtn.addEventListener('click', runAIAnalysis);
 
     var submit = document.getElementById('sr-submit');
     if (submit) submit.addEventListener('click', function() {
@@ -851,17 +944,28 @@
         var sitLbl    = (questions[1].options.find(function(o) { return o.value === state.answers.situation; }) || {}).label || '–';
         var zeitLbl   = (questions[3].options.find(function(o) { return o.value === state.answers.zeit; }) || {}).label || '–';
         var rsLbl     = (questions[4].options.find(function(o) { return o.value === state.answers.rechtsschutz; }) || {}).label || '–';
+        var ai = state.aiAssessment;
         body = 'Hallo MeinAnspruch24-Team,\n\nich habe den Schadenrechner durchlaufen und möchte meinen Fall einreichen:\n\n' +
           '• Sparte: ' + sparteLbl + '\n' +
           '• Situation: ' + sitLbl + '\n' +
           '• Streitwert: ' + euro(r.hoehe) + ' €\n' +
           '• Zeit seit Vorfall: ' + zeitLbl + '\n' +
           '• Rechtsschutz: ' + rsLbl + '\n' +
-          '• Score: ' + r.score + '/100 (' + r.tierLabel + ')\n' +
-          '• Empfohlene Stufe laut Rechner: ' + r.stufe + '\n\n' +
+          '• Basis-Score (Heuristik): ' + r.score + '/100 (' + r.tierLabel + ')\n' +
+          '• Empfohlene Stufe (Heuristik): ' + r.stufe + '\n' +
+          (ai && typeof ai.refined_score === 'number'
+            ? '\nKI-Analyse:\n' +
+              '• Score (KI): ' + ai.refined_score + '/100 (' + (ai.tier_label || ai.tier) + ')\n' +
+              (ai.suggested_stage ? '• Empfehlung: ' + ai.suggested_stage + '\n' : '') +
+              ((ai.key_positives || []).length ? '• Positiv: ' + ai.key_positives.join('; ') + '\n' : '') +
+              ((ai.risks || []).length ? '• Risiken: ' + ai.risks.join('; ') + '\n' : '') +
+              (ai.reasoning ? '• Einordnung: ' + ai.reasoning + '\n' : '')
+            : '') +
+          '\n' +
           (desc ? 'Fallbeschreibung:\n' + desc + '\n\n' : '') +
           'Bitte meldet euch für die Detailprüfung.\n\nName:\nTelefon:\nRückruf bevorzugt:\n';
-        subject = 'Neuer Fall · Score ' + r.score;
+        var scoreForSubject = (ai && typeof ai.refined_score === 'number') ? ai.refined_score : r.score;
+        subject = 'Neuer Fall · Score ' + scoreForSubject + (ai ? ' (KI-Analyse)' : '');
       }
       var mailto = 'mailto:kontakt@meinanspruch24.de?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       window.location.href = mailto;
@@ -872,6 +976,7 @@
     var descField = document.getElementById('sr-desc');
     var micStatus = document.getElementById('sr-mic-status');
     var TRANSCRIBE_URL = 'https://meinanspruch24-transcribe.florian-s-thiel.workers.dev/';
+    var ASSESS_URL     = 'https://meinanspruch24-transcribe.florian-s-thiel.workers.dev/assess';
     var mediaRecorder = null;
     var audioStream = null;
     var audioChunks = [];
