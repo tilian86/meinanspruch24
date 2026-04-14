@@ -224,6 +224,10 @@
           <span class="text-sm font-semibold">100 % erfolgsbasiert · kein Vorschuss</span>
         </div>
         <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-tertiary">mic</span>
+          <span class="text-sm font-semibold">Fall in 2 Min. einsprechen — statt tippen</span>
+        </div>
+        <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-tertiary">lock</span>
           <span class="text-sm font-semibold">DSGVO-konform · Server in Deutschland</span>
         </div>
@@ -632,13 +636,20 @@
 
     <!-- FORM -->
     <div class="p-6 sm:p-10 lg:p-12">
-      <div class="mb-6">
+      <div id="sr-progress-wrap" class="mb-6">
         <div class="flex items-center justify-between text-xs font-semibold text-on-surface-variant mb-2">
           <span>Frage <span id="sr-step">1</span> von <span id="sr-total">5</span></span>
           <span id="sr-progress-label">20 %</span>
         </div>
         <div class="h-1.5 bg-surface-container rounded-full overflow-hidden">
           <div id="sr-progress" class="h-full bg-tertiary rounded-full transition-all duration-500 ease-out" style="width:20%"></div>
+        </div>
+        <div id="sr-skip-wrap" class="mt-3 text-[11px] text-on-surface-variant/80">
+          Keine Lust auf Fragen?
+          <button id="sr-skip" type="button" class="inline-flex items-center gap-1 text-tertiary font-bold hover:underline">
+            <span class="material-symbols-outlined text-[14px]">mic</span>
+            Fall direkt einsprechen
+          </button>
         </div>
       </div>
 
@@ -700,7 +711,7 @@
       ] }
   ];
 
-  var state = { step: 0, answers: {}, done: false };
+  var state = { step: 0, answers: {}, done: false, skipped: false };
   var total = questions.length;
   document.getElementById('sr-total').textContent = total;
 
@@ -761,26 +772,32 @@
       return;
     }
 
-    var head = isFinal
-      ? '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Dein Ergebnis</div>'
-      : '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Live-Einschätzung · aktualisiert sich</div>';
-
-    var html = head +
-      '<div class="flex items-baseline gap-3 mb-1"><div class="text-6xl sm:text-7xl font-extrabold">' + r.score + '</div><div class="text-xl opacity-80">/100</div></div>' +
-      '<div class="text-xl sm:text-2xl font-bold mb-3" style="color:' + r.tierColor + '">' + r.tierLabel + '</div>' +
-      '<p class="text-white/80 text-sm leading-relaxed mb-6">' + r.tierText + '</p>';
-
-    if (hasHoehe) {
-      html +=
-        '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 space-y-3 text-sm mb-5">' +
-          '<div class="flex justify-between gap-3"><span class="opacity-80">Angenommene Forderung</span><span class="font-bold whitespace-nowrap">' + euro(r.hoehe) + ' €</span></div>' +
-          '<div class="flex justify-between gap-3"><span class="opacity-80">Empfohlene Stufe</span><span class="font-bold text-right">' + r.stufe + '</span></div>' +
-          '<div class="flex justify-between gap-3"><span class="opacity-80">Provision (geschätzt)</span><span class="font-bold">' + r.provPct + ' %</span></div>' +
-          '<div class="border-t border-white/15 pt-3 mt-3 flex justify-between gap-3 items-center">' +
-            '<span class="font-semibold">Deine Auszahlung (Ø)</span>' +
-            '<span class="font-extrabold text-lg whitespace-nowrap" style="color:' + r.tierColor + '">≈ ' + euro(r.auszahlung) + ' €</span>' +
-          '</div>' +
-        '</div>';
+    var html = '';
+    if (state.skipped) {
+      html =
+        '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Direkte Schilderung</div>' +
+        '<h3 class="text-2xl sm:text-3xl font-extrabold mb-3 leading-tight">Erzähl uns einfach, was los ist.</h3>' +
+        '<p class="text-white/80 text-sm leading-relaxed mb-6">Keine Fragen, keine Score-Rechnung — du schilderst deinen Fall frei, wir kümmern uns um die Einordnung. Sprich rein oder tipp, ganz wie du magst.</p>';
+    } else {
+      var head = isFinal
+        ? '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Dein Ergebnis</div>'
+        : '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Live-Einschätzung · aktualisiert sich</div>';
+      html = head +
+        '<div class="flex items-baseline gap-3 mb-1"><div class="text-6xl sm:text-7xl font-extrabold">' + r.score + '</div><div class="text-xl opacity-80">/100</div></div>' +
+        '<div class="text-xl sm:text-2xl font-bold mb-3" style="color:' + r.tierColor + '">' + r.tierLabel + '</div>' +
+        '<p class="text-white/80 text-sm leading-relaxed mb-6">' + r.tierText + '</p>';
+      if (hasHoehe) {
+        html +=
+          '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 space-y-3 text-sm mb-5">' +
+            '<div class="flex justify-between gap-3"><span class="opacity-80">Angenommene Forderung</span><span class="font-bold whitespace-nowrap">' + euro(r.hoehe) + ' €</span></div>' +
+            '<div class="flex justify-between gap-3"><span class="opacity-80">Empfohlene Stufe</span><span class="font-bold text-right">' + r.stufe + '</span></div>' +
+            '<div class="flex justify-between gap-3"><span class="opacity-80">Provision (geschätzt)</span><span class="font-bold">' + r.provPct + ' %</span></div>' +
+            '<div class="border-t border-white/15 pt-3 mt-3 flex justify-between gap-3 items-center">' +
+              '<span class="font-semibold">Deine Auszahlung (Ø)</span>' +
+              '<span class="font-extrabold text-lg whitespace-nowrap" style="color:' + r.tierColor + '">≈ ' + euro(r.auszahlung) + ' €</span>' +
+            '</div>' +
+          '</div>';
+      }
     }
 
     if (isFinal) {
@@ -815,7 +832,7 @@
 
     var restart = document.getElementById('sr-restart');
     if (restart) restart.addEventListener('click', function() {
-      state = { step: 0, answers: {}, done: false };
+      state = { step: 0, answers: {}, done: false, skipped: false };
       render();
     });
 
@@ -823,21 +840,30 @@
     if (submit) submit.addEventListener('click', function() {
       var desc = (document.getElementById('sr-desc').value || '').trim();
       state.answers.description = desc;
-      var sparteLbl = (questions[0].options.find(function(o) { return o.value === state.answers.sparte; }) || {}).labelFull || '–';
-      var sitLbl    = (questions[1].options.find(function(o) { return o.value === state.answers.situation; }) || {}).label || '–';
-      var zeitLbl   = (questions[3].options.find(function(o) { return o.value === state.answers.zeit; }) || {}).label || '–';
-      var rsLbl     = (questions[4].options.find(function(o) { return o.value === state.answers.rechtsschutz; }) || {}).label || '–';
-      var body = 'Hallo MeinAnspruch24-Team,\n\nich habe den Schadenrechner durchlaufen und möchte meinen Fall einreichen:\n\n' +
-        '• Sparte: ' + sparteLbl + '\n' +
-        '• Situation: ' + sitLbl + '\n' +
-        '• Streitwert: ' + euro(r.hoehe) + ' €\n' +
-        '• Zeit seit Vorfall: ' + zeitLbl + '\n' +
-        '• Rechtsschutz: ' + rsLbl + '\n' +
-        '• Score: ' + r.score + '/100 (' + r.tierLabel + ')\n' +
-        '• Empfohlene Stufe laut Rechner: ' + r.stufe + '\n\n' +
-        (desc ? 'Fallbeschreibung:\n' + desc + '\n\n' : '') +
-        'Bitte meldet euch für die Detailprüfung.\n\nName:\nTelefon:\nRückruf bevorzugt:\n';
-      var mailto = 'mailto:kontakt@meinanspruch24.de?subject=' + encodeURIComponent('Neuer Fall · Score ' + r.score) + '&body=' + encodeURIComponent(body);
+      var body, subject;
+      if (state.skipped) {
+        body = 'Hallo MeinAnspruch24-Team,\n\nich habe meinen Fall direkt geschildert (ohne den 5-Fragen-Rechner):\n\n' +
+          (desc ? 'Fallbeschreibung:\n' + desc + '\n\n' : '(Fallbeschreibung folgt per Telefon.)\n\n') +
+          'Bitte meldet euch zur weiteren Einordnung.\n\nName:\nTelefon:\nRückruf bevorzugt:\n';
+        subject = 'Neuer Fall · Direktschilderung';
+      } else {
+        var sparteLbl = (questions[0].options.find(function(o) { return o.value === state.answers.sparte; }) || {}).labelFull || '–';
+        var sitLbl    = (questions[1].options.find(function(o) { return o.value === state.answers.situation; }) || {}).label || '–';
+        var zeitLbl   = (questions[3].options.find(function(o) { return o.value === state.answers.zeit; }) || {}).label || '–';
+        var rsLbl     = (questions[4].options.find(function(o) { return o.value === state.answers.rechtsschutz; }) || {}).label || '–';
+        body = 'Hallo MeinAnspruch24-Team,\n\nich habe den Schadenrechner durchlaufen und möchte meinen Fall einreichen:\n\n' +
+          '• Sparte: ' + sparteLbl + '\n' +
+          '• Situation: ' + sitLbl + '\n' +
+          '• Streitwert: ' + euro(r.hoehe) + ' €\n' +
+          '• Zeit seit Vorfall: ' + zeitLbl + '\n' +
+          '• Rechtsschutz: ' + rsLbl + '\n' +
+          '• Score: ' + r.score + '/100 (' + r.tierLabel + ')\n' +
+          '• Empfohlene Stufe laut Rechner: ' + r.stufe + '\n\n' +
+          (desc ? 'Fallbeschreibung:\n' + desc + '\n\n' : '') +
+          'Bitte meldet euch für die Detailprüfung.\n\nName:\nTelefon:\nRückruf bevorzugt:\n';
+        subject = 'Neuer Fall · Score ' + r.score;
+      }
+      var mailto = 'mailto:kontakt@meinanspruch24.de?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       window.location.href = mailto;
     });
 
@@ -851,7 +877,7 @@
     var audioChunks = [];
     var recordingState = 'idle'; // idle | recording | transcribing
     var recordStart = 0;
-    var maxMs = 90000; // 90s Limit
+    var maxMs = 300000; // 5 Min Limit — Whisper akzeptiert bis 25 MB Audio
     var autoStopTimer = null;
 
     function setMic(state, msg) {
@@ -913,7 +939,7 @@
       setMic('recording', 'Ich nehme auf — sprich einfach los. Nochmal auf's Icon zum Stoppen.');
       autoStopTimer = setTimeout(function() {
         if (recordingState === 'recording') {
-          setMic('recording', 'Maximum 90 Sekunden erreicht — beende die Aufnahme.');
+          setMic('recording', 'Maximale Aufnahmezeit (5 Min) erreicht — beende die Aufnahme.');
           mediaRecorder.stop();
         }
       }, maxMs);
@@ -983,16 +1009,27 @@
     var nextBtn = document.getElementById('sr-next');
     var backBtn = document.getElementById('sr-back');
 
+    var progWrap = document.getElementById('sr-progress-wrap');
     if (!q || state.done) {
-      container.innerHTML =
-        '<div class="p-6 sm:p-8 rounded-2xl bg-tertiary-container text-on-tertiary-container">' +
-          '<div class="flex items-center gap-3 mb-2"><span class="material-symbols-outlined text-2xl" style="font-variation-settings:\'FILL\' 1;">verified</span><div class="font-bold text-lg">Einschätzung fertig!</div></div>' +
-          '<p class="text-sm leading-relaxed">Dein Ergebnis siehst du rechts (bzw. unterhalb auf dem Handy). Über den Button „Fall einreichen" gehen deine Angaben direkt per Mail an uns.</p>' +
-        '</div>';
+      if (progWrap) progWrap.style.display = 'none';
+      if (state.skipped) {
+        container.innerHTML =
+          '<div class="p-6 sm:p-8 rounded-2xl bg-tertiary-container text-on-tertiary-container">' +
+            '<div class="flex items-center gap-3 mb-2"><span class="material-symbols-outlined text-2xl" style="font-variation-settings:\'FILL\' 1;">mic</span><div class="font-bold text-lg">Direkte Schilderung</div></div>' +
+            '<p class="text-sm leading-relaxed">Unten (oder rechts auf Desktop) kannst du deinen Fall einsprechen oder eintippen. Danach gehen deine Angaben direkt per Mail an uns. „Zurück" bringt dich jederzeit zu den Fragen.</p>' +
+          '</div>';
+      } else {
+        container.innerHTML =
+          '<div class="p-6 sm:p-8 rounded-2xl bg-tertiary-container text-on-tertiary-container">' +
+            '<div class="flex items-center gap-3 mb-2"><span class="material-symbols-outlined text-2xl" style="font-variation-settings:\'FILL\' 1;">verified</span><div class="font-bold text-lg">Einschätzung fertig!</div></div>' +
+            '<p class="text-sm leading-relaxed">Dein Ergebnis siehst du rechts (bzw. unterhalb auf dem Handy). Über den Button „Fall einreichen" gehen deine Angaben direkt per Mail an uns.</p>' +
+          '</div>';
+      }
       nextBtn.style.display = 'none';
       backBtn.classList.remove('hidden');
       return;
     }
+    if (progWrap) progWrap.style.display = '';
 
     if (q.type === 'choice') {
       var opts = q.options.map(function(o) {
@@ -1086,8 +1123,18 @@
     render();
   });
   document.getElementById('sr-back').addEventListener('click', function() {
-    if (state.done) { state.done = false; state.step = total - 1; render(); return; }
+    if (state.done) {
+      if (state.skipped) { state.skipped = false; state.done = false; state.step = 0; render(); return; }
+      state.done = false; state.step = total - 1; render(); return;
+    }
     if (state.step > 0) { state.step--; render(); }
+  });
+
+  document.getElementById('sr-skip').addEventListener('click', function() {
+    state.skipped = true;
+    state.done = true;
+    state.step = total;
+    render();
   });
 
   render();
@@ -1173,6 +1220,21 @@
         Ja — eine Rechtsschutzversicherung deckt nur Anwaltskosten, nicht den Aufwand der Korrespondenz,
         Fristenüberwachung und Verhandlungsführung. Wir nehmen dir all das ab. Falls deine Rechtsschutz­versicherung
         eintritt, reduziert das unser eigenes Risiko und kann sich auf die Provisionsstufe auswirken.
+      </div>
+    </details>
+
+    <details class="group bg-surface-container-low rounded-2xl overflow-hidden">
+      <summary class="flex justify-between items-center p-6 cursor-pointer">
+        <span class="font-bold text-primary pr-4">Kann ich meinen Fall auch per Sprachnachricht einreichen, ohne zu tippen?</span>
+        <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+      </summary>
+      <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed">
+        Ja. Im <a href="#schadenrechner" class="text-tertiary font-semibold hover:underline">Schaden­rechner</a> gibt es ein
+        Mikrofon-Feld: sprich deinen Fall einfach ein (bis zu 5 Minuten), der Text wird automatisch transkribiert und
+        Füll­wörter-befreit. Das funktioniert auf iPhone Safari und Android Chrome ebenso wie am Desktop.
+        Wer sich die 5 Fragen sparen will, findet oben im Rechner den Link <em>„Fall direkt einsprechen"</em> — dann
+        geht's ohne Umweg zur Sprachaufnahme. Transkription läuft über OpenAI Whisper, alles DSGVO-freundlich
+        ohne lokale Datenspeicherung.
       </div>
     </details>
 
