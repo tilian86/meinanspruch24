@@ -714,7 +714,7 @@
       ] }
   ];
 
-  var state = { step: 0, answers: {}, done: false, skipped: false, aiAssessment: null, aiLoading: false };
+  var state = { step: 0, answers: {}, done: false, skipped: false, aiAssessment: null, aiLoading: false, submitMode: false, submitting: false, submitted: false, submissionResult: null, submissionError: null, pendingFiles: [], formValues: {} };
   var total = questions.length;
   document.getElementById('sr-total').textContent = total;
 
@@ -845,9 +845,354 @@
     }
   }
 
-  function renderResultPanel() {
+  // ---------- Submission-Form-Rendering ----------
+
+  function humanSize(b) { if (!b) return '0 B'; if (b < 1024) return b + ' B'; if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB'; return (b/1024/1024).toFixed(2) + ' MB'; }
+
+  function renderSubmissionForm(el) {
     var r = calc();
+    var sparteLbl = (questions[0].options.find(function(o){ return o.value === state.answers.sparte; }) || {}).labelFull || '';
+    if (state.answers.sparte === 'andere' && state.answers.sparte_other) sparteLbl = 'andere Sparte: ' + state.answers.sparte_other;
+    var sitLbl = (questions[1].options.find(function(o){ return o.value === state.answers.situation; }) || {}).label || '';
+    var ai = state.aiAssessment;
+    var contextHtml = state.skipped
+      ? '<div class="bg-white/10 rounded-xl p-3.5 text-xs text-white/75 mb-5 leading-relaxed"><strong class="text-white">Direkt-Einreichung</strong> ohne 5-Fragen-Rechner. Du schilderst gleich unten frei.</div>'
+      : '<div class="bg-white/10 rounded-xl p-3.5 text-xs text-white/75 mb-5 leading-relaxed"><strong class="text-white">Dein Fall bisher:</strong> ' +
+          (sparteLbl ? escapeHtml(sparteLbl) + ' · ' : '') +
+          (sitLbl ? escapeHtml(sitLbl) + ' · ' : '') +
+          (state.answers.hoehe ? euro(state.answers.hoehe) + ' €' : '') +
+          '<br>Score: <strong class="text-white">' + r.score + '/100</strong>' +
+          (ai && typeof ai.refined_score === 'number' ? ' · KI: <strong class="text-white">' + ai.refined_score + '/100</strong>' : '') +
+        '</div>';
+
+    var fv = state.formValues;
+    var filesHtml = (state.pendingFiles || []).map(function(f, i){
+      return '<li class="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 text-sm">' +
+               '<span class="material-symbols-outlined text-base text-white/70">' + (f.type && f.type.startsWith('image/') ? 'image' : 'description') + '</span>' +
+               '<span class="flex-1 truncate text-white">' + escapeHtml(f.name) + '</span>' +
+               '<span class="text-xs text-white/50">' + humanSize(f.size) + '</span>' +
+               '<button type="button" data-sr-del="' + i + '" class="ml-1 text-white/60 hover:text-white" aria-label="Entfernen">' +
+                 '<span class="material-symbols-outlined text-lg">close</span>' +
+               '</button>' +
+             '</li>';
+    }).join('');
+
+    var errHtml = state.submissionError
+      ? '<div class="bg-red-500/25 border border-red-400/40 rounded-xl p-3 text-sm text-white mb-4">' + escapeHtml(state.submissionError) + '</div>'
+      : '';
+
+    el.innerHTML =
+      '<div class="text-[0.7rem] uppercase tracking-[0.18em] text-tertiary-fixed mb-3">Fall einreichen</div>' +
+      '<h3 class="text-2xl font-extrabold mb-2">Offiziell an uns übergeben</h3>' +
+      '<p class="text-sm text-white/75 leading-relaxed mb-5">Wir melden uns binnen 48 Stunden mit einer individuellen Ersteinschätzung per E-Mail.</p>' +
+      contextHtml +
+      errHtml +
+      '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">' +
+        formInput('sr-f-name', 'name', 'Dein Name *', 'text', fv.name, 'Vor- und Nachname', true) +
+        formInput('sr-f-email', 'email', 'E-Mail *', 'email', fv.email, 'du@example.de', true) +
+      '</div>' +
+      '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">' +
+        formInput('sr-f-telefon', 'telefon', 'Telefon (optional)', 'tel', fv.telefon, '0160 1234567', false) +
+        formInput('sr-f-datum', 'vorfall_datum', 'Datum des Vorfalls', 'date', fv.vorfall_datum, '', false) +
+      '</div>' +
+
+      // Fallbeschreibung mit Voice
+      '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-3 ring-1 ring-white/10">' +
+        '<label for="sr-f-desc" class="text-sm font-bold text-white block mb-1">Fallbeschreibung <span class="text-red-300 font-normal">*</span></label>' +
+        '<p class="text-xs text-white/60 mb-2 leading-relaxed">Schilder deinen Fall. Voice: Mic-Icon rechts unten drücken.</p>' +
+        '<div class="relative">' +
+          '<textarea id="sr-f-desc" rows="5" required class="w-full bg-white/15 border border-white/15 rounded-xl p-3 pr-12 text-sm text-white placeholder-white/35 focus:outline-none focus:bg-white/25 focus:border-white/40 resize-y leading-relaxed min-h-[120px]" placeholder="z.B. Die Versicherung hat mich im März wegen angeblicher Vorerkrankung abgelehnt. In meinem Antrag hatte ich …">' + escapeHtml(fv.description || '') + '</textarea>' +
+          '<button id="sr-f-desc-mic" type="button" aria-label="Diktieren" class="absolute bottom-2.5 right-2.5 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 flex items-center justify-center text-white transition-all shadow-lg">' +
+            '<span class="material-symbols-outlined">mic</span>' +
+          '</button>' +
+        '</div>' +
+        '<div id="sr-f-desc-status" class="text-xs text-white/75 mt-2 hidden"></div>' +
+      '</div>' +
+
+      // Anmerkungen mit Voice (optional)
+      '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-3 ring-1 ring-white/10">' +
+        '<label for="sr-f-anm" class="text-sm font-bold text-white block mb-1">Zusätzliche Anmerkungen <span class="text-white/50 font-normal">(optional)</span></label>' +
+        '<p class="text-xs text-white/60 mb-2 leading-relaxed">Fristen, bereits eingelegter Widerspruch, Hinweise zur Erreichbarkeit …</p>' +
+        '<div class="relative">' +
+          '<textarea id="sr-f-anm" rows="3" class="w-full bg-white/15 border border-white/15 rounded-xl p-3 pr-12 text-sm text-white placeholder-white/35 focus:outline-none focus:bg-white/25 focus:border-white/40 resize-y leading-relaxed min-h-[80px]">' + escapeHtml(fv.anmerkungen || '') + '</textarea>' +
+          '<button id="sr-f-anm-mic" type="button" aria-label="Diktieren" class="absolute bottom-2.5 right-2.5 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 flex items-center justify-center text-white transition-all shadow-lg">' +
+            '<span class="material-symbols-outlined">mic</span>' +
+          '</button>' +
+        '</div>' +
+        '<div id="sr-f-anm-status" class="text-xs text-white/75 mt-2 hidden"></div>' +
+      '</div>' +
+
+      // Dokumente (Drag&Drop + Click)
+      '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-5 ring-1 ring-white/10">' +
+        '<label class="text-sm font-bold text-white block mb-1">Dokumente <span class="text-white/50 font-normal">(optional, max 5 Dateien × 5 MB)</span></label>' +
+        '<p class="text-xs text-white/60 mb-3 leading-relaxed">Ablehnungsschreiben, Fotos vom Schaden, Kostenvoranschläge, Gutachten …</p>' +
+        '<label id="sr-f-drop" for="sr-f-files" class="block cursor-pointer border-2 border-dashed border-white/30 hover:border-white/60 rounded-xl p-5 text-center text-sm text-white/75 transition-colors">' +
+          '<span class="material-symbols-outlined text-2xl block mb-1 opacity-80">upload_file</span>' +
+          'Dateien hierher ziehen oder <span class="text-[#fde68a] font-semibold underline">klicken zum Auswählen</span>' +
+        '</label>' +
+        '<input id="sr-f-files" type="file" multiple class="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.eml,.msg">' +
+        (filesHtml ? '<ul id="sr-f-filelist" class="mt-3 space-y-1.5">' + filesHtml + '</ul>' : '') +
+      '</div>' +
+
+      '<button id="sr-f-submit" type="button" class="inline-flex items-center justify-center gap-2 w-full bg-tertiary text-on-tertiary px-6 py-4 rounded-xl font-extrabold text-base hover:bg-tertiary-container hover:shadow-lg transition-all">' +
+        '<span class="material-symbols-outlined">send</span>Fall jetzt einreichen' +
+      '</button>' +
+      '<button id="sr-f-back" type="button" class="mt-3 w-full px-5 py-2.5 rounded-xl text-sm font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all">Zurück zum Ergebnis</button>' +
+      '<p class="text-[11px] text-white/50 mt-4 leading-relaxed">Mit dem Einreichen stimmst du zu, dass wir deine Angaben zur Prüfung verarbeiten. Audio-Aufnahmen werden über OpenAI Whisper transkribiert (USA, AVV). Details in der <a href="/datenschutz.html" class="underline hover:text-white">Datenschutzerklärung</a>.</p>';
+
+    // Wire up
+    ['name', 'email', 'telefon', 'vorfall_datum', 'description', 'anmerkungen'].forEach(function(n, i) {
+      var ids = ['sr-f-name','sr-f-email','sr-f-telefon','sr-f-datum','sr-f-desc','sr-f-anm'];
+      var elIn = document.getElementById(ids[i]);
+      if (elIn) elIn.addEventListener('input', function() { state.formValues[n] = elIn.value; });
+    });
+
+    setupVoiceForTarget({ micBtnId: 'sr-f-desc-mic', descId: 'sr-f-desc', statusId: 'sr-f-desc-status', onSaveToFormValues: 'description' });
+    setupVoiceForTarget({ micBtnId: 'sr-f-anm-mic', descId: 'sr-f-anm', statusId: 'sr-f-anm-status', onSaveToFormValues: 'anmerkungen' });
+
+    // File input + Drag&Drop
+    var fileInput = document.getElementById('sr-f-files');
+    var dropZone = document.getElementById('sr-f-drop');
+    function addFiles(fileList) {
+      var arr = Array.from(fileList || []);
+      arr.forEach(function(f) {
+        if (f.size > 5 * 1024 * 1024) { state.submissionError = 'Datei "' + f.name + '" ist größer als 5 MB.'; return; }
+        if (state.pendingFiles.length >= 5) { state.submissionError = 'Maximal 5 Dateien erlaubt.'; return; }
+        state.pendingFiles.push(f);
+      });
+      render();
+    }
+    if (fileInput) fileInput.addEventListener('change', function() { addFiles(fileInput.files); fileInput.value = ''; });
+    if (dropZone) {
+      ['dragenter','dragover'].forEach(function(ev) { dropZone.addEventListener(ev, function(e){ e.preventDefault(); dropZone.classList.add('border-white/70','bg-white/5'); }); });
+      ['dragleave','drop'].forEach(function(ev) { dropZone.addEventListener(ev, function(e){ e.preventDefault(); dropZone.classList.remove('border-white/70','bg-white/5'); }); });
+      dropZone.addEventListener('drop', function(e){ if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-sr-del]'), function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = Number(btn.getAttribute('data-sr-del'));
+        state.pendingFiles.splice(idx, 1);
+        render();
+      });
+    });
+
+    // Back + Submit
+    var back = document.getElementById('sr-f-back');
+    if (back) back.addEventListener('click', function() { state.submitMode = false; state.submissionError = null; render(); });
+    var sub = document.getElementById('sr-f-submit');
+    if (sub) sub.addEventListener('click', handleFormSubmit);
+  }
+
+  function formInput(id, name, label, type, value, placeholder, required) {
+    return '<div>' +
+      '<label for="' + id + '" class="text-xs font-semibold text-white/85 block mb-1">' + label + '</label>' +
+      '<input id="' + id + '" type="' + type + '" name="' + name + '"' + (required ? ' required' : '') +
+        ' value="' + escapeHtml(value || '') + '" placeholder="' + escapeHtml(placeholder || '') + '"' +
+        ' class="w-full bg-white/15 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/40 focus:outline-none focus:bg-white/25 focus:border-white/40 transition-colors">' +
+    '</div>';
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; });
+  }
+
+  function renderSubmittingScreen(el) {
+    el.innerHTML =
+      '<div class="flex flex-col items-center justify-center py-16">' +
+        '<span class="material-symbols-outlined text-5xl animate-spin mb-4">progress_activity</span>' +
+        '<div class="text-xl font-bold mb-2">Wir übernehmen gerade deine Daten …</div>' +
+        '<p class="text-sm text-white/70 text-center max-w-xs">Upload läuft. Das dauert bei Dokumenten wenige Sekunden.</p>' +
+      '</div>';
+  }
+
+  function renderSuccessScreen(el) {
+    var s = state.submissionResult || {};
+    el.innerHTML =
+      '<div class="text-center">' +
+        '<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#4edea3]/20 mb-5">' +
+          '<span class="material-symbols-outlined text-5xl text-[#4edea3]" style="font-variation-settings:\'FILL\' 1;">check_circle</span>' +
+        '</div>' +
+        '<h3 class="text-2xl sm:text-3xl font-extrabold mb-2">Eingereicht — wir kümmern uns.</h3>' +
+        '<p class="text-white/80 leading-relaxed mb-5">Deine Schadensmeldung ist bei uns angekommen. Wir prüfen sie und melden uns binnen 48 Stunden per E-Mail mit einer individuellen Ersteinschätzung.</p>' +
+        '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 mb-5 text-sm">' +
+          '<div class="text-xs uppercase tracking-wider text-white/60 mb-1 font-semibold">Deine Referenz</div>' +
+          '<div class="font-mono text-base font-bold">' + escapeHtml(s.submissionId || '—') + '</div>' +
+          (s.fileCount ? '<div class="text-xs text-white/60 mt-2">' + s.fileCount + ' Datei' + (s.fileCount !== 1 ? 'en' : '') + ' übertragen</div>' : '') +
+        '</div>' +
+        (s.warning ? '<div class="bg-amber-400/25 border border-amber-300/40 rounded-xl p-3 text-sm text-white mb-5">' + escapeHtml(s.warning) + '</div>' : '') +
+        '<p class="text-xs text-white/55 leading-relaxed mb-6">Notiere dir die Referenz, falls du Rückfragen per Mail hast (<a href="mailto:kontakt@meinanspruch24.de" class="underline hover:text-white">kontakt@meinanspruch24.de</a>).</p>' +
+        '<button id="sr-f-new" type="button" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all">' +
+          '<span class="material-symbols-outlined text-base">refresh</span>Neuen Fall einreichen' +
+        '</button>' +
+      '</div>';
+    var nb = document.getElementById('sr-f-new');
+    if (nb) nb.addEventListener('click', function() {
+      state = { step: 0, answers: {}, done: false, skipped: false, aiAssessment: null, aiLoading: false, submitMode: false, submitting: false, submitted: false, submissionResult: null, submissionError: null, pendingFiles: [], formValues: {} };
+      render();
+    });
+  }
+
+  async function handleFormSubmit() {
+    state.submissionError = null;
+    var fv = state.formValues;
+    // Validate
+    if (!fv.name || fv.name.trim().length < 2) { state.submissionError = 'Bitte Name eintragen.'; render(); return; }
+    if (!fv.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fv.email)) { state.submissionError = 'Bitte gültige E-Mail-Adresse eintragen.'; render(); return; }
+    var desc = (document.getElementById('sr-f-desc') || {}).value || fv.description || '';
+    if (!desc || desc.trim().length < 20) { state.submissionError = 'Bitte beschreibe deinen Fall mit ein paar Sätzen (mindestens 20 Zeichen).'; render(); return; }
+    fv.description = desc;
+    fv.anmerkungen = (document.getElementById('sr-f-anm') || {}).value || fv.anmerkungen || '';
+
+    state.submitting = true;
+    render();
+
+    try {
+      var fd = new FormData();
+      fd.append('name', fv.name.trim());
+      fd.append('email', fv.email.trim());
+      if (fv.telefon) fd.append('telefon', fv.telefon.trim());
+      if (fv.vorfall_datum) fd.append('vorfall_datum', fv.vorfall_datum);
+      fd.append('description', fv.description.trim());
+      if (fv.anmerkungen) fd.append('anmerkungen', fv.anmerkungen.trim());
+
+      // Schadenrechner-Kontext
+      if (!state.skipped) {
+        var r = calc();
+        var sparteLbl = (questions[0].options.find(function(o){ return o.value === state.answers.sparte; }) || {}).labelFull || '';
+        if (state.answers.sparte === 'andere' && state.answers.sparte_other) sparteLbl = 'andere Sparte: ' + state.answers.sparte_other;
+        fd.append('sparte_label', sparteLbl);
+        fd.append('situation_label', (questions[1].options.find(function(o){ return o.value === state.answers.situation; }) || {}).label || '');
+        fd.append('zeit_label', (questions[3].options.find(function(o){ return o.value === state.answers.zeit; }) || {}).label || '');
+        fd.append('rechtsschutz_label', (questions[4].options.find(function(o){ return o.value === state.answers.rechtsschutz; }) || {}).label || '');
+        if (state.answers.hoehe) fd.append('hoehe', String(state.answers.hoehe));
+        fd.append('baseline_score', String(r.score));
+        var ai = state.aiAssessment;
+        if (ai && typeof ai.refined_score === 'number') {
+          fd.append('ai_score', String(ai.refined_score));
+          if (ai.tier_label) fd.append('ai_tier_label', ai.tier_label);
+          if (ai.suggested_stage) fd.append('ai_suggested_stage', ai.suggested_stage);
+          if (ai.reasoning) fd.append('ai_reasoning', ai.reasoning);
+          if ((ai.key_positives || []).length) fd.append('ai_key_positives', ai.key_positives.join('; '));
+          if ((ai.risks || []).length) fd.append('ai_risks', ai.risks.join('; '));
+        }
+      }
+
+      (state.pendingFiles || []).forEach(function(f, i) { fd.append('file_' + i, f, f.name); });
+
+      var resp = await fetch(SUBMIT_URL, { method: 'POST', body: fd });
+      var data = await resp.json();
+      if (!resp.ok || !data.success) {
+        state.submissionError = data.error || ('Einreichen fehlgeschlagen (HTTP ' + resp.status + ')');
+        state.submitting = false;
+        render();
+        return;
+      }
+      state.submissionResult = data;
+      state.submitted = true;
+      state.submitting = false;
+      state.submitMode = false;
+      render();
+      try { window.scrollTo({ top: document.getElementById('schadenrechner').offsetTop - 120, behavior: 'smooth' }); } catch (e) {}
+    } catch (e) {
+      state.submissionError = 'Netzwerkfehler: ' + (e.message || String(e));
+      state.submitting = false;
+      render();
+    }
+  }
+
+  // ---------- Reusable Voice Recorder (MediaRecorder -> Worker /transcribe) ----------
+  function setupVoiceForTarget(opts) {
+    var micBtn = document.getElementById(opts.micBtnId);
+    var descField = document.getElementById(opts.descId);
+    var micStatus = document.getElementById(opts.statusId);
+    if (!micBtn || !descField) return;
+    if (!navigator.mediaDevices || typeof MediaRecorder === 'undefined') { micBtn.style.display = 'none'; return; }
+
+    var mediaRecorder = null;
+    var audioStream = null;
+    var audioChunks = [];
+    var recState = 'idle';
+    var recordStart = 0;
+    var maxMs = 300000;
+    var autoStopTimer = null;
+
+    function setMic(s, msg) {
+      recState = s;
+      if (s === 'recording') {
+        micBtn.classList.remove('bg-white/20');
+        micBtn.classList.add('bg-red-500', 'animate-pulse');
+        micBtn.innerHTML = '<span class="material-symbols-outlined">stop</span>';
+      } else if (s === 'transcribing') {
+        micBtn.classList.remove('bg-red-500', 'animate-pulse');
+        micBtn.classList.add('bg-white/20');
+        micBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span>';
+        micBtn.disabled = true;
+      } else {
+        micBtn.classList.remove('bg-red-500', 'animate-pulse');
+        micBtn.classList.add('bg-white/20');
+        micBtn.innerHTML = '<span class="material-symbols-outlined">mic</span>';
+        micBtn.disabled = false;
+      }
+      if (msg && micStatus) { micStatus.textContent = msg; micStatus.classList.remove('hidden'); }
+    }
+
+    function cleanupStream() {
+      if (audioStream) { audioStream.getTracks().forEach(function(t){ t.stop(); }); audioStream = null; }
+      if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
+    }
+
+    async function startRecording() {
+      try { audioStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      catch (e) { setMic('idle', e.name === 'NotAllowedError' ? 'Mikrofon-Zugriff wurde verweigert.' : 'Mikrofon nicht verfügbar: ' + (e.message || e.name)); return; }
+      var mime = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mime)) mime = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+      try { mediaRecorder = mime ? new MediaRecorder(audioStream, { mimeType: mime }) : new MediaRecorder(audioStream); }
+      catch (e) { setMic('idle', 'Aufnahme konnte nicht gestartet werden.'); cleanupStream(); return; }
+      audioChunks = [];
+      mediaRecorder.ondataavailable = function(ev) { if (ev.data && ev.data.size > 0) audioChunks.push(ev.data); };
+      mediaRecorder.onstop = onStopped;
+      mediaRecorder.start();
+      recordStart = Date.now();
+      setMic('recording', 'Ich nehme auf — sprich einfach los. Nochmal auf das Icon zum Stoppen.');
+      autoStopTimer = setTimeout(function() { if (recState === 'recording') mediaRecorder.stop(); }, maxMs);
+    }
+
+    function stopRecording() { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop(); }
+
+    async function onStopped() {
+      cleanupStream();
+      if ((Date.now() - recordStart) < 600 || audioChunks.length === 0) { setMic('idle', 'Aufnahme war zu kurz.'); return; }
+      var blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      audioChunks = [];
+      setMic('transcribing', 'Transkribiere & glätte …');
+      try {
+        var resp = await fetch(TRANSCRIBE_URL, { method: 'POST', headers: { 'Content-Type': blob.type || 'audio/webm' }, body: blob });
+        var data = await resp.json();
+        if (!resp.ok) { setMic('idle', 'Transkription fehlgeschlagen: ' + (data.error || resp.status)); return; }
+        var text = (data.text || '').trim();
+        if (!text) { setMic('idle', 'Keine Worte erkannt.'); return; }
+        var current = descField.value ? descField.value.replace(/\s+$/, '') + '\n\n' : '';
+        descField.value = current + text;
+        if (opts.onSaveToFormValues) state.formValues[opts.onSaveToFormValues] = descField.value;
+        else if (opts.onText) opts.onText(descField.value);
+        setMic('idle', data.cleaned ? 'Transkribiert & geglättet ✓' : 'Transkribiert ✓');
+        setTimeout(function(){ if (micStatus) micStatus.classList.add('hidden'); }, 3500);
+      } catch (e) { setMic('idle', 'Netzwerkfehler: ' + (e.message || e)); }
+    }
+
+    micBtn.addEventListener('click', function() {
+      if (recState === 'recording') stopRecording();
+      else if (recState === 'idle') startRecording();
+    });
+  }
+
+  function renderResultPanel() {
     var el = document.getElementById('sr-result');
+    if (state.submitted)  { renderSuccessScreen(el); return; }
+    if (state.submitting) { renderSubmittingScreen(el); return; }
+    if (state.submitMode) { renderSubmissionForm(el); return; }
+
+    var r = calc();
     var hasHoehe = !!state.answers.hoehe;
     var answeredCount = Object.keys(state.answers).filter(function(k) {
       return state.answers[k] !== undefined && state.answers[k] !== null && state.answers[k] !== '';
@@ -926,7 +1271,7 @@
 
     var restart = document.getElementById('sr-restart');
     if (restart) restart.addEventListener('click', function() {
-      state = { step: 0, answers: {}, done: false, skipped: false, aiAssessment: null, aiLoading: false };
+      state = { step: 0, answers: {}, done: false, skipped: false, aiAssessment: null, aiLoading: false, submitMode: false, submitting: false, submitted: false, submissionResult: null, submissionError: null, pendingFiles: [], formValues: {} };
       render();
     });
 
@@ -935,184 +1280,17 @@
 
     var submit = document.getElementById('sr-submit');
     if (submit) submit.addEventListener('click', function() {
-      var desc = (document.getElementById('sr-desc').value || '').trim();
-      state.answers.description = desc;
-      var body, subject;
-      if (state.skipped) {
-        body = 'Hallo MeinAnspruch24-Team,\n\nich habe meinen Fall direkt geschildert (ohne den 5-Fragen-Rechner):\n\n' +
-          (desc ? 'Fallbeschreibung:\n' + desc + '\n\n' : '(Fallbeschreibung folgt per Telefon.)\n\n') +
-          'Bitte meldet euch zur weiteren Einordnung.\n\nName:\nTelefon:\nRückruf bevorzugt:\n';
-        subject = 'Neuer Fall · Direktschilderung';
-      } else {
-        var sparteLbl = (questions[0].options.find(function(o) { return o.value === state.answers.sparte; }) || {}).labelFull || '–';
-        if (state.answers.sparte === 'andere' && state.answers.sparte_other) {
-          sparteLbl = 'andere Sparte: ' + state.answers.sparte_other;
-        }
-        var sitLbl    = (questions[1].options.find(function(o) { return o.value === state.answers.situation; }) || {}).label || '–';
-        var zeitLbl   = (questions[3].options.find(function(o) { return o.value === state.answers.zeit; }) || {}).label || '–';
-        var rsLbl     = (questions[4].options.find(function(o) { return o.value === state.answers.rechtsschutz; }) || {}).label || '–';
-        var ai = state.aiAssessment;
-        body = 'Hallo MeinAnspruch24-Team,\n\nich habe den Schadenrechner durchlaufen und möchte meinen Fall einreichen:\n\n' +
-          '• Sparte: ' + sparteLbl + '\n' +
-          '• Situation: ' + sitLbl + '\n' +
-          '• Streitwert: ' + euro(r.hoehe) + ' €\n' +
-          '• Zeit seit Vorfall: ' + zeitLbl + '\n' +
-          '• Rechtsschutz: ' + rsLbl + '\n' +
-          '• Basis-Score (Heuristik): ' + r.score + '/100 (' + r.tierLabel + ')\n' +
-          '• Empfohlene Stufe (Heuristik): ' + r.stufe + '\n' +
-          (ai && typeof ai.refined_score === 'number'
-            ? '\nKI-Analyse:\n' +
-              '• Score (KI): ' + ai.refined_score + '/100 (' + (ai.tier_label || ai.tier) + ')\n' +
-              (ai.suggested_stage ? '• Empfehlung: ' + ai.suggested_stage + '\n' : '') +
-              ((ai.key_positives || []).length ? '• Positiv: ' + ai.key_positives.join('; ') + '\n' : '') +
-              ((ai.risks || []).length ? '• Risiken: ' + ai.risks.join('; ') + '\n' : '') +
-              (ai.reasoning ? '• Einordnung: ' + ai.reasoning + '\n' : '')
-            : '') +
-          '\n' +
-          (desc ? 'Fallbeschreibung:\n' + desc + '\n\n' : '') +
-          'Bitte meldet euch für die Detailprüfung.\n\nName:\nTelefon:\nRückruf bevorzugt:\n';
-        var scoreForSubject = (ai && typeof ai.refined_score === 'number') ? ai.refined_score : r.score;
-        subject = 'Neuer Fall · Score ' + scoreForSubject + (ai ? ' (KI-Analyse)' : '');
-      }
-      var mailto = 'mailto:kontakt@meinanspruch24.de?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-      window.location.href = mailto;
+      // Prefill description from Schadenrechner-Textarea
+      var desc = (document.getElementById('sr-desc') || {}).value || '';
+      state.formValues.description = (state.formValues.description || desc).trim();
+      state.submitMode = true;
+      render();
     });
 
-    // Voice input setup (MediaRecorder → Cloudflare Worker → OpenAI Whisper)
-    var micBtn = document.getElementById('sr-mic');
+    // Voice-Setup fuer das Schadenrechner-Beschreibungsfeld (nutzt generalisierte Funktion)
     var descField = document.getElementById('sr-desc');
-    var micStatus = document.getElementById('sr-mic-status');
-    var TRANSCRIBE_URL = 'https://meinanspruch24-transcribe.florian-s-thiel.workers.dev/';
-    var ASSESS_URL     = 'https://meinanspruch24-transcribe.florian-s-thiel.workers.dev/assess';
-    var mediaRecorder = null;
-    var audioStream = null;
-    var audioChunks = [];
-    var recordingState = 'idle'; // idle | recording | transcribing
-    var recordStart = 0;
-    var maxMs = 300000; // 5 Min Limit — Whisper akzeptiert bis 25 MB Audio
-    var autoStopTimer = null;
-
-    function setMic(state, msg) {
-      recordingState = state;
-      if (state === 'recording') {
-        micBtn.classList.remove('bg-white/20');
-        micBtn.classList.add('bg-red-500', 'animate-pulse');
-        micBtn.innerHTML = '<span class="material-symbols-outlined text-base">stop</span>';
-      } else if (state === 'transcribing') {
-        micBtn.classList.remove('bg-red-500', 'animate-pulse');
-        micBtn.classList.add('bg-white/20');
-        micBtn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">progress_activity</span>';
-        micBtn.disabled = true;
-      } else {
-        micBtn.classList.remove('bg-red-500', 'animate-pulse');
-        micBtn.classList.add('bg-white/20');
-        micBtn.innerHTML = '<span class="material-symbols-outlined text-base">mic</span>';
-        micBtn.disabled = false;
-      }
-      if (msg) { micStatus.textContent = msg; micStatus.classList.remove('hidden'); }
-    }
-
-    function cleanupStream() {
-      if (audioStream) { audioStream.getTracks().forEach(function(t){ t.stop(); }); audioStream = null; }
-      if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
-    }
-
-    async function startRecording() {
-      try {
-        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      } catch (e) {
-        setMic('idle', e.name === 'NotAllowedError'
-          ? 'Mikrofon-Zugriff wurde verweigert. Erlaubnis in den Browser-Einstellungen setzen und nochmal.'
-          : 'Mikrofon nicht verfügbar: ' + (e.message || e.name));
-        return;
-      }
-
-      var mime = 'audio/webm;codecs=opus';
-      if (typeof MediaRecorder === 'undefined') {
-        setMic('idle', 'Dein Browser unterstützt Sprachaufnahme nicht — tippe einfach.');
-        cleanupStream();
-        return;
-      }
-      if (!MediaRecorder.isTypeSupported(mime)) {
-        mime = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
-      }
-      try {
-        mediaRecorder = mime ? new MediaRecorder(audioStream, { mimeType: mime }) : new MediaRecorder(audioStream);
-      } catch (e) {
-        setMic('idle', 'Aufnahme konnte nicht gestartet werden: ' + (e.message || e.name));
-        cleanupStream();
-        return;
-      }
-      audioChunks = [];
-      mediaRecorder.ondataavailable = function(ev) { if (ev.data && ev.data.size > 0) audioChunks.push(ev.data); };
-      mediaRecorder.onstop = onRecordingStopped;
-      mediaRecorder.start();
-      recordStart = Date.now();
-      setMic('recording', 'Ich nehme auf — sprich einfach los. Nochmal auf das Icon tippen zum Stoppen.');
-      autoStopTimer = setTimeout(function() {
-        if (recordingState === 'recording') {
-          setMic('recording', 'Maximale Aufnahmezeit (5 Min) erreicht — beende die Aufnahme.');
-          mediaRecorder.stop();
-        }
-      }, maxMs);
-    }
-
-    function stopRecording() {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-      }
-    }
-
-    async function onRecordingStopped() {
-      cleanupStream();
-      var duration = Date.now() - recordStart;
-      if (duration < 600 || audioChunks.length === 0) {
-        setMic('idle', 'Aufnahme war zu kurz — bitte nochmal versuchen.');
-        return;
-      }
-      var blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-      audioChunks = [];
-      setMic('transcribing', 'Transkribiere &amp; glätte deine Aufnahme …');
-
-      try {
-        var resp = await fetch(TRANSCRIBE_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': blob.type || 'audio/webm' },
-          body: blob,
-        });
-        var data = await resp.json();
-        if (!resp.ok) {
-          setMic('idle', 'Transkription fehlgeschlagen: ' + (data.error || resp.status));
-          return;
-        }
-        var text = (data.text || '').trim();
-        if (!text) {
-          setMic('idle', 'Keine Worte erkannt — nochmal, bitte etwas deutlicher.');
-          return;
-        }
-        var current = descField.value ? descField.value.replace(/\s+$/, '') + '\n\n' : '';
-        descField.value = current + text;
-        state.answers.description = descField.value;
-        var suffix = data.cleaned
-          ? 'Transkribiert &amp; geglättet ✓ — du kannst frei nachbessern.'
-          : 'Transkribiert ✓ — du kannst frei nachbessern.';
-        setMic('idle', suffix);
-        setTimeout(function() { micStatus.classList.add('hidden'); }, 3500);
-      } catch (e) {
-        setMic('idle', 'Netzwerkfehler bei der Transkription: ' + (e.message || e));
-      }
-    }
-
-    if (descField) {
-      descField.addEventListener('input', function() { state.answers.description = descField.value; });
-    }
-
-    if (micBtn && descField && navigator.mediaDevices && typeof MediaRecorder !== 'undefined') {
-      micBtn.addEventListener('click', function() {
-        if (recordingState === 'recording') stopRecording();
-        else if (recordingState === 'idle') startRecording();
-      });
-    }
+    if (descField) descField.addEventListener('input', function() { state.answers.description = descField.value; });
+    setupVoiceForTarget({ micBtnId: 'sr-mic', descId: 'sr-desc', statusId: 'sr-mic-status', onText: function(v) { state.answers.description = v; } });
   }
 
   function renderQuestion() {
