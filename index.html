@@ -682,6 +682,25 @@
   var TRANSCRIBE_URL = WORKER_BASE + '/';
   var ASSESS_URL = WORKER_BASE + '/assess';
   var SUBMIT_URL = WORKER_BASE + '/submit';
+
+  // Browser-Detection: iOS-Eigenheiten, Chrome iOS hat kein MediaRecorder, In-App-Browser zickig
+  var UA = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
+  var IS_IOS = /iPad|iPhone|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var IS_IOS_CHROME = IS_IOS && /CriOS/.test(UA);
+  var IS_IOS_FIREFOX = IS_IOS && /FxiOS/.test(UA);
+  var IS_IN_APP = /WhatsApp|FBAN|FBAV|Instagram|Line\/|MicroMessenger|Twitter|Snapchat|Threads/i.test(UA);
+  var IS_IOS_SAFARI = IS_IOS && !IS_IOS_CHROME && !IS_IOS_FIREFOX && !IS_IN_APP && /Safari/.test(UA);
+
+  function friendlyFetchError(e) {
+    var msg = (e && e.message) || String(e);
+    if (/Load failed|NetworkError|Failed to fetch/i.test(msg)) {
+      if (IS_IN_APP) return 'Verbindung im In-App-Browser blockiert. Bitte oben rechts auf das Teilen-Symbol tippen und „in Safari öffnen" wählen.';
+      if (!navigator.onLine) return 'Keine Internet-Verbindung. Verbinde dich neu und versuche es nochmal.';
+      return 'Netzwerk-Fehler — bitte gleich nochmal versuchen.';
+    }
+    return msg;
+  }
+
   var questions = [
     { id: 'sparte', title: 'Um welche Versicherung geht es?', type: 'choice',
       options: [
@@ -843,7 +862,7 @@
     } catch (e) {
       state.aiLoading = false;
       state.aiAssessment = null;
-      if (block) block.innerHTML = '<div class="bg-red-500/20 border border-red-500/40 rounded-2xl p-4 text-sm text-white">Netzwerk-Fehler: ' + escapeHtml(e.message || String(e)) + '. <button id="sr-ai-retry" class="underline font-semibold ml-1">Nochmal</button></div>';
+      if (block) block.innerHTML = '<div class="bg-red-500/20 border border-red-500/40 rounded-2xl p-4 text-sm text-white">' + escapeHtml(friendlyFetchError(e)) + ' <button id="sr-ai-retry" class="underline font-semibold ml-1">Nochmal</button></div>';
       var retry = document.getElementById('sr-ai-retry');
       if (retry) retry.addEventListener('click', runAIAnalysis);
     }
@@ -1124,7 +1143,7 @@
       render();
       try { window.scrollTo({ top: document.getElementById('schadenrechner').offsetTop - 120, behavior: 'smooth' }); } catch (e) {}
     } catch (e) {
-      state.submissionError = 'Netzwerkfehler: ' + (e.message || String(e));
+      state.submissionError = friendlyFetchError(e);
       state.submitting = false;
       render();
     }
@@ -1207,7 +1226,7 @@
         else if (opts.onText) opts.onText(descField.value);
         setMic('idle', data.cleaned ? 'Transkribiert & geglättet ✓' : 'Transkribiert ✓');
         setTimeout(function(){ if (micStatus) micStatus.classList.add('hidden'); }, 3500);
-      } catch (e) { setMic('idle', 'Netzwerkfehler: ' + (e.message || e)); }
+      } catch (e) { setMic('idle', friendlyFetchError(e)); }
     }
 
     micBtn.addEventListener('click', function() {
@@ -1283,7 +1302,13 @@
               : '') +
           '</div>' +
           '<div id="sr-mic-status" class="text-sm text-white/75 mt-3 hidden"></div>' +
-          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über <strong>OpenAI Whisper</strong> (USA, Auftragsverarbeitung) und wird anschließend von GPT-5.4-mini geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern. Die Audiodatei wird nach der Transkription verworfen. Details in der <a href="/datenschutz.html" class="underline hover:text-white/75">Datenschutzerklärung</a>.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
+          (voiceSupported
+            ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über <strong>OpenAI Whisper</strong> (USA, Auftragsverarbeitung) und wird anschließend von GPT-5.4-mini geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern. Die Audiodatei wird nach der Transkription verworfen. Details in der <a href="/datenschutz.html" class="underline hover:text-white/75">Datenschutzerklärung</a>.</div>'
+            : (IS_IOS_CHROME || IS_IOS_FIREFOX
+              ? '<div class="text-[11px] text-white/55 mt-2 leading-snug bg-amber-500/15 border border-amber-300/30 rounded-lg px-2.5 py-2"><strong>Sprachaufnahme nur in Safari möglich.</strong> Auf dem iPhone unterstützt nur Safari die nötigen Aufnahme-Funktionen — andere Browser sind hier von Apple eingeschränkt. Tippe einfach den Text ein oder öffne die Seite in Safari.</div>'
+              : IS_IN_APP
+                ? '<div class="text-[11px] text-white/55 mt-2 leading-snug bg-amber-500/15 border border-amber-300/30 rounded-lg px-2.5 py-2"><strong>Sprachaufnahme im In-App-Browser nicht verfügbar.</strong> Bitte oben das Teilen-Symbol tippen und in Safari oder Chrome öffnen — oder den Text einfach eintippen.</div>'
+                : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>')) +
         '</div>' +
         '<div id="sr-ai-block" class="mb-5">' + renderAIBlock() + '</div>' +
         '<p class="text-sm text-white/60 leading-relaxed mb-5">' +
