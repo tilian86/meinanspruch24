@@ -678,6 +678,10 @@
 <script>
 (function() {
   'use strict';
+  var WORKER_BASE = 'https://meinanspruch24-transcribe.florian-s-thiel.workers.dev';
+  var TRANSCRIBE_URL = WORKER_BASE + '/';
+  var ASSESS_URL = WORKER_BASE + '/assess';
+  var SUBMIT_URL = WORKER_BASE + '/submit';
   var questions = [
     { id: 'sparte', title: 'Um welche Versicherung geht es?', type: 'choice',
       options: [
@@ -1253,14 +1257,14 @@
               : '') +
           '</div>' +
           '<div id="sr-mic-status" class="text-sm text-white/75 mt-3 hidden"></div>' +
-          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über <strong>OpenAI Whisper</strong> (USA, Auftragsverarbeitung) und wird anschließend von gpt-4o-mini geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern. Die Audiodatei wird nach der Transkription verworfen. Details in der <a href="/datenschutz.html" class="underline hover:text-white/75">Datenschutzerklärung</a>.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
+          (voiceSupported ? '<div class="text-[11px] text-white/45 mt-2 leading-snug">Diktat läuft über <strong>OpenAI Whisper</strong> (USA, Auftragsverarbeitung) und wird anschließend von GPT-5.4-mini geglättet (Füllwörter raus, Satzzeichen rein) — Inhalt bleibt 1:1, Ergebnis kannst du frei nachbessern. Die Audiodatei wird nach der Transkription verworfen. Details in der <a href="/datenschutz.html" class="underline hover:text-white/75">Datenschutzerklärung</a>.</div>' : '<div class="text-[11px] text-white/45 mt-2 leading-snug">Dein Browser unterstützt keine Sprachaufnahme — tippe einfach.</div>') +
         '</div>' +
         '<div id="sr-ai-block" class="mb-5">' + renderAIBlock() + '</div>' +
         '<p class="text-sm text-white/60 leading-relaxed mb-5">' +
           'Hinweis: Der Basis-Score ist eine <strong>heuristische Orientierung</strong>, keine belastbare Prognose. Die <em>KI-Analyse</em> verfeinert das Bild anhand deiner Fallbeschreibung. Die individuelle Prüfung durch uns bleibt entscheidend — meist im positiven Sinne, weil Details nicht komplett abgedeckt sind.' +
         '</p>' +
         '<button id="sr-submit" type="button" class="inline-flex items-center justify-center gap-2 w-full bg-tertiary text-on-tertiary px-6 py-4 rounded-xl font-extrabold text-base hover:bg-tertiary-container hover:shadow-lg transition-all">' +
-          '<span class="material-symbols-outlined">send</span>Fall jetzt per Mail einreichen' +
+          '<span class="material-symbols-outlined">send</span>Fall jetzt einreichen' +
         '</button>' +
         '<button id="sr-restart" type="button" class="mt-3 w-full px-5 py-2.5 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/10 transition-all">Neu berechnen</button>';
     } else if (!hasHoehe) {
