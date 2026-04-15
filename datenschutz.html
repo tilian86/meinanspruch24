@@ -10,6 +10,16 @@
 <link rel="icon" type="image/png" sizes="256x256" href="/assets/favicon-256.png" />
 <link rel="apple-touch-icon" sizes="512x512" href="/assets/apple-touch-icon.png" />
 <meta name="theme-color" content="#0b2330" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://meinanspruch24.de/datenschutz.html" />
+<meta property="og:title" content="Datenschutzerklärung — MeinAnspruch24" />
+<meta property="og:description" content="Wie wir personenbezogene Daten verarbeiten — DSGVO-konform und transparent." />
+<meta property="og:image" content="https://meinanspruch24.de/assets/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="de_DE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://meinanspruch24.de/assets/og-image.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -27,6 +37,9 @@
   .prose strong { color: #0b2330; font-weight: 700; }
   .prose a { color: #f47935; text-decoration: underline; text-underline-offset: 2px; }
   .prose a:hover { color: #d15f1e; }
+  .prose table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.92rem; }
+  .prose th, .prose td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .prose th { background: #f1f5f9; font-weight: 700; color: #0b2330; }
   html, body { overflow-x: clip; max-width: 100vw; }
   nav, nav > div, nav img { transition: height 0.25s ease, padding 0.25s ease, border-radius 0.25s ease, background-color 0.25s ease; }
   nav.nav-compact > div { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; }
@@ -59,12 +72,12 @@
   <article class="max-w-3xl mx-auto prose">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[#f47935] mb-3">Rechtliches</div>
     <h1 class="text-3xl sm:text-4xl font-extrabold text-[#0b2330] leading-tight mb-4">Datenschutzerklärung</h1>
-    <p class="text-sm text-[#4d5c66] !mb-0">Stand: 14. April 2026 · <strong>Prototyp-Fassung</strong></p>
+    <p class="text-sm text-[#4d5c66] !mb-0">Stand: 15. April 2026</p>
 
     <div class="my-8 p-5 rounded-2xl bg-amber-50 border border-amber-200 text-sm text-amber-900 leading-relaxed">
-      <strong>Hinweis:</strong> Diese Datenschutzerklärung bezieht sich ausschließlich auf die öffentliche Prototyp-Website
-      <strong>meinanspruch24.de</strong>. Funktionen zur Vertragsanbahnung (Schadenrechner, Fall-Upload, Kundenportal)
-      werden erst mit Marktstart aktiviert; die Erklärung wird dann entsprechend erweitert.
+      <strong>Status:</strong> MeinAnspruch24 befindet sich in der Aufbauphase. Der Schadenrechner und das Einreichungs-Formular sind technisch funktionsfähig.
+      Eine inhaltliche Fall­bearbeitung erfolgt derzeit noch nicht — eingereichte Fälle werden zur Konzept­validierung von uns gesichtet, dir gegenüber transparent kommuniziert
+      und nur auf deinen ausdrücklichen Wunsch hin weiter­bearbeitet.
     </div>
 
     <h2>1. Verantwortlicher</h2>
@@ -75,71 +88,154 @@
       E-Mail: <a href="mailto:kontakt@meinanspruch24.de">kontakt@meinanspruch24.de</a>
     </p>
 
-    <h2>2. Zweck dieser Website</h2>
-    <p>
-      Die Website <strong>meinanspruch24.de</strong> dient derzeit ausschließlich der Darstellung eines
-      Prototyp-Entwurfs. Wir erheben, speichern oder verwenden aktuell keine personenbezogenen Daten
-      zur Vertragsanbahnung. Es gibt keine Anmelde-, Registrierungs- oder Kontaktformulare.
-    </p>
+    <h2>2. Überblick: Welche Daten verarbeiten wir wofür?</h2>
+    <p>Diese Erklärung beschreibt drei voneinander unabhängige Verarbeitungs­bereiche:</p>
+    <ul>
+      <li><strong>Website-Auslieferung</strong> (Ziff.&nbsp;3): rein technische Verbindungs­daten beim Aufruf der Seite.</li>
+      <li><strong>Schadenrechner</strong> (Ziff.&nbsp;4): freiwillige Eingabe einer Fall­beschreibung mit optionaler Sprach­transkription und KI-gestützter Einschätzung. Verlässt deinen Browser nur, wenn du es aktiv auslöst.</li>
+      <li><strong>Fall­einreichung</strong> (Ziff.&nbsp;5): Übermittlung deiner Kontakt- und Falldaten samt Belegen an uns zur weiteren Bearbeitung.</li>
+    </ul>
 
-    <h2>3. Hosting &amp; Auslieferung</h2>
+    <h2>3. Hosting &amp; Auslieferung der Website</h2>
     <p>
       Die Website wird über <strong>GitHub Pages</strong> (GitHub, Inc., 88 Colin P. Kelly Jr. Street,
       San Francisco, CA 94107, USA) ausgeliefert und durch <strong>Cloudflare, Inc.</strong> (101 Townsend St,
       San Francisco, CA 94107, USA) als Content-Delivery-Network und Reverse-Proxy beschleunigt und abgesichert.
-      Dabei verarbeiten beide Anbieter technisch unvermeidbare Verbindungsdaten: IP-Adresse, User-Agent,
-      aufgerufene URL, Zeitstempel und Referrer. Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO (berechtigtes
-      Interesse an sicherer und performanter Website-Bereitstellung).
+      Beide Anbieter verarbeiten technisch unvermeidbare Verbindungs­daten (IP-Adresse, User-Agent,
+      aufgerufene URL, Zeitstempel, Referrer). Diese Daten werden von uns selbst nicht ausgewertet oder gespeichert.
     </p>
+    <p>Rechtsgrundlage: Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO (berechtigtes Interesse an sicherer und performanter Bereitstellung).</p>
     <ul>
       <li>Datenschutz GitHub: <a href="https://docs.github.com/privacy" target="_blank" rel="noopener">docs.github.com/privacy</a></li>
       <li>Datenschutz Cloudflare: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">cloudflare.com/privacypolicy</a></li>
     </ul>
+    <h3>3.1 Schriften und Icons</h3>
+    <p>Die Seite lädt Schriften und Icons von <strong>Google Fonts</strong> und <strong>Material Symbols</strong> (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland) sowie das CSS-Framework <strong>Tailwind</strong> über das Cloudflare-CDN. Beim Laden wird deine IP-Adresse an Google übermittelt. Eine lokale Auslieferung ist für die Produktiv­fassung vorgesehen.</p>
 
-    <h2>4. Externe Ressourcen</h2>
-    <p>Zur Darstellung werden Schriften und Icons von Drittanbietern geladen:</p>
-    <ul>
-      <li><strong>Google Fonts</strong> (Plus Jakarta Sans, Manrope) und <strong>Material Symbols</strong> — Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Dabei wird deine IP-Adresse an Google übermittelt. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</li>
-      <li><strong>Tailwind CSS</strong> via Cloudflare-CDN (<code>cdn.tailwindcss.com</code>) — reine Auslieferung der CSS-Bibliothek.</li>
-    </ul>
-    <p>Eine lokale Auslieferung dieser Ressourcen ist für die Produktivfassung vorgesehen.</p>
+    <h2>4. Schadenrechner und KI-gestützte Einschätzung</h2>
+    <p>Der Schadenrechner ist eine clientseitige Anwendung, die ohne Daten­übertragung läuft, bis du eine der folgenden Funktionen aktiv auslöst:</p>
 
-    <h2>5. Sprach-Transkription im Schadenrechner</h2>
+    <h3>4.1 Sprach­transkription (Whisper)</h3>
     <p>
-      Im Schadenrechner kannst du deine Fallbeschreibung <strong>freiwillig</strong> per Sprachaufnahme eingeben.
-      Betätigst du das Mikrofon-Icon, fragt dein Browser einmalig um Erlaubnis zum Mikrofon­zugriff. Die Audiodaten
-      werden <strong>nicht</strong> auf unseren Servern gespeichert, sondern zur Transkription über einen
-      Cloudflare-Worker an die <strong>OpenAI API</strong> übergeben:
+      Klickst du auf das Mikrofon-Symbol, fragt dein Browser einmalig um Erlaubnis zum Mikrofon­zugriff. Die aufgenommene Audiodatei
+      wird über unseren Cloudflare-Worker an die <strong>OpenAI API</strong> übermittelt und dort durch das Modell <em>whisper-1</em>
+      in Text umgewandelt. Die Audiodatei wird unmittelbar nach der Transkription verworfen und nicht bei uns gespeichert.
+    </p>
+
+    <h3>4.2 Redaktionelle Glättung (GPT-5.4-mini)</h3>
+    <p>
+      Der transkribierte Text wird im Anschluss an das Modell <em>gpt-5.4-mini</em> übergeben, um Füll­wörter zu entfernen
+      und Interpunktion zu setzen. Inhalt und Bedeutung bleiben unverändert. Du kannst das Ergebnis im Textfeld jederzeit selbst überarbeiten.
+    </p>
+
+    <h3>4.3 KI-Analyse (GPT-5.4)</h3>
+    <p>
+      Auf deine ausdrückliche Anforderung hin („KI-Analyse starten") werden deine Antworten aus dem Schadenrechner
+      (Sparte, Status, Höhe, Zeit, Rechtsschutz) sowie deine Fall­beschreibung an das Modell <em>gpt-5.4</em> übermittelt.
+      Das Modell liefert eine strukturierte juristische Ersteinschätzung mit Erfolgs­tendenz, Stärken und Risiken zurück.
+      Diese Einschätzung ist <strong>kein Ersatz für eine Rechts­beratung</strong> und stellt keine Garantie dar.
+    </p>
+
+    <h3>4.4 Anbieter, Drittland­transfer, Speicherdauer</h3>
+    <ul>
+      <li><strong>Anbieter:</strong> OpenAI, L.L.C., 3180 18th Street, San Francisco, CA 94110, USA — sowie ggf. Tochter­gesellschaften innerhalb der OpenAI-Gruppe.</li>
+      <li><strong>Rechtsgrundlage:</strong> Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;a DSGVO (deine Einwilligung durch bewusstes Aktivieren der jeweiligen Funktion).</li>
+      <li><strong>Drittland­transfer:</strong> Die Verarbeitung erfolgt in den USA. Abgesichert durch das mit OpenAI abgeschlossene <em>Data Processing Addendum</em> einschließlich EU-Standard­vertrags­klauseln (SCCs) nach Art.&nbsp;46 DSGVO.</li>
+      <li><strong>Kein Modell-Training:</strong> OpenAI sichert vertraglich zu, API-Daten nicht zum Training ihrer Modelle zu verwenden (<a href="https://openai.com/enterprise-privacy" target="_blank" rel="noopener">openai.com/enterprise-privacy</a>).</li>
+      <li><strong>Speicherdauer bei OpenAI:</strong> bis zu 30 Tage zu Missbrauchs- und Sicherheits­zwecken, danach automatische Löschung.</li>
+      <li><strong>Bei uns:</strong> Wir speichern weder die Audio­datei noch die übermittelten Texte aus dem Schadenrechner dauerhaft. Nur wenn du den Fall danach aktiv einreichst (Ziff.&nbsp;5), werden die Daten bei uns gespeichert.</li>
+    </ul>
+    <p><strong>Alternative:</strong> Du kannst alle Eingaben auch selbst tippen und auf die KI-Analyse verzichten — dann bleiben deine Daten ausschließlich in deinem Browser, bis du den Fall einreichst.</p>
+
+    <h2>5. Fall­einreichung</h2>
+    <p>
+      Klickst du auf <strong>„Fall jetzt einreichen"</strong>, wirst du zu einem Formular geführt. Erst mit Absenden dieses Formulars
+      werden deine Daten dauerhaft bei uns gespeichert. Wir verarbeiten dabei:
     </p>
     <ul>
-      <li><strong>Anbieter:</strong> OpenAI, L.L.C., 3180 18th Street, San Francisco, CA 94110, USA</li>
-      <li><strong>Modelle:</strong> <em>whisper-1</em> (Transkription) und <em>gpt-4o-mini</em> (redaktionelle Glättung: Interpunktion, Füllwörter; Inhalt bleibt unverändert)</li>
-      <li><strong>Rechtsgrundlage:</strong> Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;a DSGVO — deine Einwilligung durch bewusstes Aktivieren des Mikrofons und Freigabe in deinem Browser. Alternativ: Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO (berechtigtes Interesse an bequemer Eingabe).</li>
-      <li><strong>Drittland­transfer:</strong> OpenAI verarbeitet Daten in den USA. Abgesichert durch den mit OpenAI abgeschlossenen <strong>Data Processing Addendum</strong> inklusive EU-Standardvertragsklauseln (SCCs) nach Art.&nbsp;46 DSGVO. OpenAI sichert vertraglich zu, API-Daten <strong>nicht für das Training</strong> ihrer Modelle zu verwenden (<a href="https://openai.com/enterprise-privacy" target="_blank" rel="noopener">openai.com/enterprise-privacy</a>).</li>
-      <li><strong>Speicherdauer bei OpenAI:</strong> bis zu 30 Tage zu Missbrauchs- und Sicherheitszwecken, danach automatische Löschung.</li>
-      <li><strong>Alternative:</strong> Du kannst deine Fallbeschreibung jederzeit auch selbst tippen — dann verlassen deine Daten den Browser überhaupt nicht, bis du auf „Fall einreichen" klickst und dein lokales Mail-Programm öffnet.</li>
+      <li>die von dir angegebenen <strong>Kontakt­daten</strong> (Anrede, Vor- und Nachname, E-Mail, optional Telefon),</li>
+      <li>deine <strong>Fall­schilderung</strong> sowie die Antworten aus dem Schadenrechner,</li>
+      <li>die <strong>von dir hochgeladenen Dokumente</strong> (z.&nbsp;B. Versicherungs­schein, Ablehnungs­schreiben, Foto, Gutachten),</li>
+      <li>die <strong>technischen Metadaten</strong> der Übermittlung (Zeitstempel, Vorgangs-ID, IP-Adresse zur Missbrauchs­abwehr).</li>
+    </ul>
+    <p><strong>Rechtsgrundlage:</strong> Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b DSGVO (Durchführung vorvertraglicher Maßnahmen auf deine Anfrage hin) sowie Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;a DSGVO (deine Einwilligung in die KI-gestützte Bearbeitung).</p>
+
+    <h3>5.1 Speicher­ort und Schutz</h3>
+    <p>
+      Die hochgeladenen Dokumente werden im Objekt­speicher <strong>Cloudflare R2</strong> in der Region <em>Western Europe (WEUR)</em>
+      gespeichert. Der Zugriff erfolgt ausschließlich über zeitlich begrenzte, kryptographisch signierte Links (HMAC-SHA-256, gültig 30 Tage).
+      Die strukturierten Falldaten werden zusätzlich per E-Mail an die verantwortliche Stelle übermittelt; die E-Mail-Zustellung erfolgt über
+      <strong>Cloudflare Email Routing</strong> an einen verifizierten Posteingang.
+    </p>
+
+    <h3>5.2 Aufbewahrungsfristen</h3>
+    <ul>
+      <li><strong>Falldaten und Belege:</strong> 90 Tage zur Bearbeitung deiner Anfrage. Nach Abschluss bzw. nach Ablauf dieser Frist werden sie gelöscht, sofern keine gesetzlichen Aufbewahrungs­pflichten (z.&nbsp;B. § 257 HGB, § 147 AO) entgegenstehen oder du der Verlängerung zur weiteren Bearbeitung zugestimmt hast.</li>
+      <li><strong>E-Mail-Korrespondenz:</strong> bis zu 6 Monate nach letztem Kontakt, danach Löschung.</li>
+      <li><strong>Technische Metadaten</strong> (IP, Zeitstempel): bis zu 30 Tage zur Abwehr von Missbrauch.</li>
     </ul>
 
-    <h2>6. Cookies</h2>
-    <p>Diese Prototyp-Website setzt keine Cookies ein. Sollten mit Aktivierung von Funktionen (z.&nbsp;B. Login, Präferenzen)
-      notwendige Cookies erforderlich werden, informieren wir rechtzeitig und holen — soweit erforderlich — eine
-      Einwilligung über einen Consent-Banner ein.</p>
+    <h3>5.3 Übermittlung an Dritte</h3>
+    <p>
+      Eine Weitergabe an externe Stellen (z.&nbsp;B. Rechts­anwälte, Sachverständige, Inkasso­dienst­leister) erfolgt nur nach
+      <strong>vorheriger ausdrücklicher Zustimmung im Einzelfall</strong>. Eine Übermittlung an Versicherungs­gesellschaften
+      erfolgt nur zur Durchsetzung deines konkreten Anspruchs und nur, wenn du dies mit uns vereinbart hast.
+    </p>
 
-    <h2>7. Deine Rechte</h2>
+    <h2>6. Eingesetzte Auftrags­verarbeiter</h2>
+    <p>Wir setzen folgende Dienst­leister ein, mit denen jeweils ein Vertrag zur Auftragsverarbeitung nach Art.&nbsp;28 DSGVO besteht oder geschlossen wird:</p>
+    <table>
+      <thead>
+        <tr><th>Anbieter</th><th>Zweck</th><th>Sitz / Verarbeitungsort</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cloudflare, Inc.</td><td>CDN, Worker-Backend, R2-Objekt­speicher (EU/WEUR), Email-Routing</td><td>USA / EU</td></tr>
+        <tr><td>GitHub, Inc.</td><td>Hosting der statischen Seiten</td><td>USA</td></tr>
+        <tr><td>OpenAI, L.L.C.</td><td>Sprach­transkription, Text­glättung, KI-Einschätzung (auf Anforderung)</td><td>USA</td></tr>
+        <tr><td>Google Ireland Ltd.</td><td>Auslieferung Web-Schriften und Icons</td><td>EU/USA</td></tr>
+      </tbody>
+    </table>
+
+    <h2>7. Cookies</h2>
+    <p>
+      Diese Website setzt keine Cookies und keine vergleichbaren Tracking-Technologien ein. Es findet keine Reichweiten­messung,
+      kein Profiling und keine Werbe-Personalisierung statt.
+    </p>
+
+    <h2>8. Sicherheit der Verarbeitung (Art.&nbsp;32 DSGVO)</h2>
+    <ul>
+      <li>Verschlüsselter Transport via HTTPS/TLS auf allen Verbindungen.</li>
+      <li>Server­seitige Validierung aller Eingaben, Whitelist erlaubter Datei­typen (Bilder, PDF), Größen­begrenzung pro Datei und Vorgang.</li>
+      <li>Rate-Limits zur Abwehr automatisierter Massen­einsendungen.</li>
+      <li>Zugriffs­schutz auf gespeicherte Belege durch zeitlich begrenzte, signierte URLs (HMAC-SHA-256).</li>
+      <li>Strikte Trennung von öffentlich zugänglichem Code (Frontend) und privaten Schlüsseln (im Worker-Secret-Store).</li>
+    </ul>
+
+    <h2>9. Deine Rechte</h2>
     <p>Du hast jederzeit das Recht auf:</p>
     <ul>
-      <li>Auskunft (Art.&nbsp;15 DSGVO)</li>
-      <li>Berichtigung (Art.&nbsp;16 DSGVO)</li>
-      <li>Löschung (Art.&nbsp;17 DSGVO)</li>
-      <li>Einschränkung der Verarbeitung (Art.&nbsp;18 DSGVO)</li>
-      <li>Datenübertragbarkeit (Art.&nbsp;20 DSGVO)</li>
-      <li>Widerspruch gegen die Verarbeitung (Art.&nbsp;21 DSGVO)</li>
-      <li>Beschwerde bei einer Aufsichtsbehörde (Art.&nbsp;77 DSGVO). Zuständig ist der <strong>Landesbeauftragte für den Datenschutz und die Informationsfreiheit Baden-Württemberg</strong>, <a href="https://www.baden-wuerttemberg.datenschutz.de" target="_blank" rel="noopener">baden-wuerttemberg.datenschutz.de</a>.</li>
+      <li>Auskunft über die zu deiner Person gespeicherten Daten (Art.&nbsp;15 DSGVO),</li>
+      <li>Berichtigung unrichtiger Daten (Art.&nbsp;16 DSGVO),</li>
+      <li>Löschung deiner Daten (Art.&nbsp;17 DSGVO),</li>
+      <li>Einschränkung der Verarbeitung (Art.&nbsp;18 DSGVO),</li>
+      <li>Datenübertragbarkeit in einem strukturierten, gängigen Format (Art.&nbsp;20 DSGVO),</li>
+      <li>Widerspruch gegen die Verarbeitung (Art.&nbsp;21 DSGVO),</li>
+      <li>Widerruf einer erteilten Einwilligung mit Wirkung für die Zukunft (Art.&nbsp;7 Abs.&nbsp;3 DSGVO),</li>
+      <li>Beschwerde bei einer Aufsichts­behörde (Art.&nbsp;77 DSGVO). Zuständig ist der <strong>Landesbeauftragte für den Datenschutz und die Informationsfreiheit Baden-Württemberg</strong>, <a href="https://www.baden-wuerttemberg.datenschutz.de" target="_blank" rel="noopener">baden-wuerttemberg.datenschutz.de</a>.</li>
     </ul>
+    <p>Anfragen richtest du formlos an <a href="mailto:kontakt@meinanspruch24.de">kontakt@meinanspruch24.de</a>. Wir antworten innerhalb der gesetzlichen Frist von einem Monat.</p>
 
-    <h2>8. Änderungen dieser Erklärung</h2>
-    <p>Diese Datenschutzerklärung wird inhaltlich überarbeitet, sobald Funktionen zur Datenerhebung aktiviert werden.
-      Die jeweils aktuelle Fassung ist auf dieser Seite abrufbar.</p>
+    <h2>10. Automatisierte Entscheidungs­findung</h2>
+    <p>
+      Eine ausschließlich automatisierte Entscheidung nach Art.&nbsp;22 DSGVO findet nicht statt. Die KI-Analyse liefert eine
+      unverbindliche Erst­einschätzung; jede konkrete Bearbeitung deines Falls erfolgt durch einen Menschen.
+    </p>
+
+    <h2>11. Änderungen dieser Erklärung</h2>
+    <p>
+      Wir passen diese Datenschutz­erklärung an, wenn sich Funktionen, Anbieter oder Rechts­lage ändern. Die jeweils aktuelle
+      Fassung ist auf dieser Seite abrufbar. Wesentliche Änderungen kommunizieren wir bei aktiven Vorgängen zusätzlich per E-Mail.
+    </p>
   </article>
 </main>
 
