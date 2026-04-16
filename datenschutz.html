@@ -72,7 +72,7 @@
   <article class="max-w-3xl mx-auto prose">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[#f47935] mb-3">Rechtliches</div>
     <h1 class="text-3xl sm:text-4xl font-extrabold text-[#0b2330] leading-tight mb-4">Datenschutzerklärung</h1>
-    <p class="text-sm text-[#4d5c66] !mb-0">Stand: 15. April 2026</p>
+    <p class="text-sm text-[#4d5c66] !mb-0">Stand: 16. April 2026</p>
 
     <div class="my-8 p-5 rounded-2xl bg-amber-50 border border-amber-200 text-sm text-amber-900 leading-relaxed">
       <strong>Status:</strong> MeinAnspruch24 befindet sich in der Aufbauphase. Der Schadenrechner und das Einreichungs-Formular sind technisch funktionsfähig.
@@ -189,7 +189,7 @@
         <tr><th>Anbieter</th><th>Zweck</th><th>Sitz / Verarbeitungsort</th></tr>
       </thead>
       <tbody>
-        <tr><td>Cloudflare, Inc.</td><td>CDN, Worker-Backend, R2-Objekt­speicher (EU/WEUR), Email-Routing</td><td>USA / EU</td></tr>
+        <tr><td>Cloudflare, Inc.</td><td>CDN, Worker-Backend, R2-Objekt­speicher (EU/WEUR), Email-Routing, Web Analytics (Reichweiten­messung)</td><td>USA / EU</td></tr>
         <tr><td>GitHub, Inc.</td><td>Hosting der statischen Seiten</td><td>USA</td></tr>
         <tr><td>OpenAI, L.L.C.</td><td>Sprach­transkription, Text­glättung, KI-Einschätzung (auf Anforderung)</td><td>USA</td></tr>
         <tr><td>Google Ireland Ltd.</td><td>Auslieferung Web-Schriften und Icons</td><td>EU/USA</td></tr>
@@ -198,8 +198,9 @@
 
     <h2>7. Cookies und lokale Browser-Speicherung</h2>
     <p>
-      Diese Website setzt <strong>keine Cookies</strong> und keine Tracking-Technologien ein. Es findet keine Reichweiten­messung,
-      kein Profiling und keine Werbe-Personalisierung statt.
+      Diese Website setzt <strong>keine Cookies</strong> und keine geräte­übergreifenden Tracking-Technologien ein.
+      Es findet <strong>kein Profiling</strong>, <strong>keine Werbe-Personalisierung</strong> und <strong>keine Weitergabe an Werbe-Netzwerke</strong> statt.
+      Zur Qualitäts­sicherung setzen wir lediglich eine datensparsame, cookie­freie Reichweiten­messung ein (siehe Ziff.&nbsp;8).
     </p>
     <p>
       Zur Komfort­funktion merkt sich dein Browser im <em>localStorage</em> deine Zwischen­eingaben im Schadenrechner
@@ -210,7 +211,41 @@
       über den Button „Neu starten" im Schadenrechner oder über die Browser-Einstellungen löschen.
     </p>
 
-    <h2>8. Sicherheit der Verarbeitung (Art.&nbsp;32 DSGVO)</h2>
+    <h2>8. Reichweiten­messung (Cloudflare Web Analytics)</h2>
+    <p>
+      Zur Ermittlung der Website-Nutzung und der technischen Leistung setzen wir <strong>Cloudflare Web Analytics</strong>
+      (Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA) ein. Das Tool ist bewusst so ausgewählt, weil es zu
+      den am wenigsten eingriffs­intensiven Analyse-Lösungen gehört:
+    </p>
+    <ul>
+      <li><strong>Keine Cookies</strong> und keine anderen persistenten Kennungen auf deinem Gerät.</li>
+      <li><strong>Keine geräte- oder seiten­übergreifende Wieder­erkennung</strong> einzelner Nutzer.</li>
+      <li>Keine Weitergabe der Daten an Dritte, insbesondere nicht an Werbe-Netzwerke.</li>
+      <li>Erhobene Informationen beschränken sich auf: aufgerufene URL, Verweis-URL (Referer), Browser- und Gerätetyp
+        (aus dem User-Agent), Fenster­größe, grobe Herkunfts­region (Land / Stadt auf Basis der IP-Adresse), sowie
+        Performance-Kennzahlen (Ladezeiten, Core Web Vitals).</li>
+      <li>Die IP-Adresse wird <strong>nicht gespeichert</strong>; sie dient nur kurzzeitig der geografischen Einordnung und wird
+        unmittelbar danach verworfen.</li>
+      <li>Die so entstehenden Statistiken werden nur in <strong>aggregierter Form</strong> und ohne Rückbezug auf einzelne
+        Personen ausgewertet.</li>
+    </ul>
+    <p>
+      <strong>Rechtsgrundlage:</strong> Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO. Unser berechtigtes Interesse liegt in der
+      sachgerechten Weiter­entwicklung der Website und der zuverlässigen, schnellen Bereitstellung unseres Angebots.
+      Wegen der strikten Datenminimierung und der fehlenden Wieder­erkennung überwiegen deine Interessen nicht.
+    </p>
+    <p>
+      <strong>Drittland­transfer:</strong> Abgesichert durch den mit Cloudflare geschlossenen Auftrags­verarbeitungs­vertrag
+      inklusive EU-Standard­vertrags­klauseln (SCCs) nach Art.&nbsp;46 DSGVO.
+      Weitere Informationen: <a href="https://www.cloudflare.com/web-analytics-privacy/" target="_blank" rel="noopener">cloudflare.com/web-analytics-privacy</a>.
+    </p>
+    <p>
+      <strong>Widerspruchs­recht:</strong> Du kannst der Verarbeitung nach Art.&nbsp;21 DSGVO jederzeit widersprechen,
+      formlos an <a href="mailto:kontakt@meinanspruch24.de">kontakt@meinanspruch24.de</a>. Zusätzlich lässt sich das Beacon
+      in deinem Browser blockieren (z.&nbsp;B. über gängige Privacy-Erweiterungen oder den Do-Not-Track-Schalter).
+    </p>
+
+    <h2>9. Sicherheit der Verarbeitung (Art.&nbsp;32 DSGVO)</h2>
     <ul>
       <li>Verschlüsselter Transport via HTTPS/TLS auf allen Verbindungen.</li>
       <li>Server­seitige Validierung aller Eingaben, Whitelist erlaubter Datei­typen (Bilder, PDF), Größen­begrenzung pro Datei und Vorgang.</li>
@@ -219,7 +254,7 @@
       <li>Strikte Trennung von öffentlich zugänglichem Code (Frontend) und privaten Schlüsseln (im Worker-Secret-Store).</li>
     </ul>
 
-    <h2>9. Deine Rechte</h2>
+    <h2>10. Deine Rechte</h2>
     <p>Du hast jederzeit das Recht auf:</p>
     <ul>
       <li>Auskunft über die zu deiner Person gespeicherten Daten (Art.&nbsp;15 DSGVO),</li>
@@ -233,13 +268,13 @@
     </ul>
     <p>Anfragen richtest du formlos an <a href="mailto:kontakt@meinanspruch24.de">kontakt@meinanspruch24.de</a>. Wir antworten innerhalb der gesetzlichen Frist von einem Monat.</p>
 
-    <h2>10. Automatisierte Entscheidungs­findung</h2>
+    <h2>11. Automatisierte Entscheidungs­findung</h2>
     <p>
       Eine ausschließlich automatisierte Entscheidung nach Art.&nbsp;22 DSGVO findet nicht statt. Die KI-Analyse liefert eine
       unverbindliche Erst­einschätzung; jede konkrete Bearbeitung deines Falls erfolgt durch einen Menschen.
     </p>
 
-    <h2>11. Änderungen dieser Erklärung</h2>
+    <h2>12. Änderungen dieser Erklärung</h2>
     <p>
       Wir passen diese Datenschutz­erklärung an, wenn sich Funktionen, Anbieter oder Rechts­lage ändern. Die jeweils aktuelle
       Fassung ist auf dieser Seite abrufbar. Wesentliche Änderungen kommunizieren wir bei aktiven Vorgängen zusätzlich per E-Mail.
