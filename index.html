@@ -33,7 +33,7 @@
   "@type": "Organization",
   "name": "MeinAnspruch24",
   "url": "https://meinanspruch24.de/",
-  "logo": "https://meinanspruch24.de/assets/logo-brand.jpg",
+  "logo": "https://meinanspruch24.de/assets/logo-brand.png",
   "description": "Digitale Versicherungs-Regulierung auf Erfolgsbasis: Wir setzen Ansprüche gegen Versicherungen durch — Berufsunfähigkeit, Wohngebäude, Hausrat, Kfz.",
   "email": "kontakt@meinanspruch24.de",
   "address": { "@type": "PostalAddress", "addressLocality": "Tübingen", "addressCountry": "DE" },
@@ -160,8 +160,8 @@
   html, body { overflow-x: clip; max-width: 100vw; }
   nav, nav > div, nav img { transition: height 0.25s ease, padding 0.25s ease, border-radius 0.25s ease, background-color 0.25s ease; }
   nav.nav-compact > div { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; }
-  nav.nav-compact img { height: 3rem !important; border-radius: 0.5rem !important; }
-  @media (min-width: 640px) { nav.nav-compact img { height: 3.5rem !important; } }
+  nav.nav-compact img { height: 2.25rem !important; }
+  @media (min-width: 640px) { nav.nav-compact img { height: 2.5rem !important; } }
 </style>
 </head>
 
@@ -217,12 +217,12 @@
 <!-- ────────────────────────  NAV  ──────────────────────── -->
 <nav class="fixed top-[26px] sm:top-[40px] inset-x-0 z-50 glass-nav">
   <div class="max-w-7xl mx-auto flex justify-between items-center px-6 lg:px-8 py-3">
-    <a href="/" class="flex items-center tracking-tight -my-1" aria-label="MeinAnspruch24 Startseite">
-      <img src="/assets/logo-brand.jpg"
+    <a href="/" class="flex items-center tracking-tight shrink-0" aria-label="MeinAnspruch24 Startseite">
+      <img src="/assets/logo-brand.png"
            alt="MeinAnspruch24 — Digitale Versicherungs-Regulierung, 100% erfolgsbasiert"
-           class="h-24 sm:h-32 w-auto rounded-xl" />
+           class="h-12 sm:h-16 w-auto" />
     </a>
-    <div class="hidden md:flex items-center gap-8">
+    <div class="hidden lg:flex items-center gap-6 xl:gap-8 whitespace-nowrap">
       <a href="#so-funktionierts" class="label-md text-on-surface-variant hover:text-tertiary transition-colors">So funktioniert's</a>
       <a href="#sparten"          class="label-md text-on-surface-variant hover:text-tertiary transition-colors">Leistungen</a>
       <a href="#kosten"           class="label-md text-on-surface-variant hover:text-tertiary transition-colors">Kosten</a>
@@ -230,13 +230,13 @@
       <a href="#faq"              class="label-md text-on-surface-variant hover:text-tertiary transition-colors">FAQ</a>
     </div>
     <a href="#schadenrechner"
-       class="bg-tertiary text-on-tertiary px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-tertiary-container active:scale-[0.98] transition-all shadow-sm">
+       class="shrink-0 whitespace-nowrap bg-tertiary text-on-tertiary px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-tertiary-container active:scale-[0.98] transition-all shadow-sm">
       Anspruch prüfen
     </a>
   </div>
 </nav>
 
-<main class="pt-[148px] sm:pt-[200px]">
+<main class="pt-[120px] sm:pt-[150px]">
 
 <!-- ────────────────────────  HERO  ──────────────────────── -->
 <section class="relative px-6 lg:px-8 pt-12 pb-20 lg:pb-28 max-w-7xl mx-auto">
