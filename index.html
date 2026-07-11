@@ -26,6 +26,20 @@
 <meta name="twitter:title" content="MeinAnspruch24 — Versicherung zahlt nicht? Wir holen dein Geld." />
 <meta name="twitter:description" content="Wir setzen deinen Versicherungsanspruch auf Erfolgsbasis durch." />
 <meta name="twitter:image" content="https://meinanspruch24.de/assets/og-image.png" />
+<link rel="canonical" href="https://meinanspruch24.de/" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "MeinAnspruch24",
+  "url": "https://meinanspruch24.de/",
+  "logo": "https://meinanspruch24.de/assets/logo-brand.jpg",
+  "description": "Digitale Versicherungs-Regulierung auf Erfolgsbasis: Wir setzen Ansprüche gegen Versicherungen durch — Berufsunfähigkeit, Wohngebäude, Hausrat, Kfz.",
+  "email": "kontakt@meinanspruch24.de",
+  "address": { "@type": "PostalAddress", "addressLocality": "Tübingen", "addressCountry": "DE" },
+  "areaServed": "DE"
+}
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -871,6 +885,8 @@
     if (hoehe && hoehe < 1000) score -= 10;
     else if (hoehe >= 5000 && hoehe < 50000) score += 10;
     else if (hoehe >= 50000) score += 5;
+    // Verjährungs-Risiko deckelt den Score: erst wenn Hemmung geklärt ist, kann die Aussicht "hoch" sein
+    if (state.answers.zeit === 'alt') score = Math.min(score, 49);
     score = Math.max(0, Math.min(100, score));
 
     var tier, tierLabel, tierText, tierColor;
@@ -892,6 +908,48 @@
 
     return { score: score, tier: tier, tierLabel: tierLabel, tierText: tierText, tierColor: tierColor,
              stufe: stufe, provPct: provPct, hoehe: hoehe, durchgesetzt: durchgesetzt, auszahlung: auszahlung };
+  }
+
+  // Verjährungs-Check: Regelverjährung 3 Jahre ab Jahresende (§§ 195, 199 BGB).
+  // Liefert level 'kritisch' | 'knapp' | 'ok' — aus exaktem Datum (präzise) oder der Zeit-Antwort (grob).
+  function verjaehrungsInfo() {
+    var datum = (state.formValues && state.formValues.vorfall_datum) || '';
+    if (datum) {
+      var d = new Date(datum + 'T12:00:00');
+      if (!isNaN(d.getTime())) {
+        var deadline = new Date(d.getFullYear() + 3, 11, 31, 23, 59, 59);
+        var msLeft = deadline.getTime() - Date.now();
+        var days = Math.floor(msLeft / 86400000);
+        if (days < 0)    return { level: 'kritisch', quelle: 'datum', deadline: deadline, days: days };
+        if (days < 200)  return { level: 'knapp',    quelle: 'datum', deadline: deadline, days: days };
+        return { level: 'ok', quelle: 'datum', deadline: deadline, days: days };
+      }
+    }
+    var zeit = state.answers.zeit;
+    if (zeit === 'alt')    return { level: 'kritisch', quelle: 'zeitraum' };
+    if (zeit === 'mittel') return { level: 'knapp',    quelle: 'zeitraum' };
+    return { level: 'ok', quelle: 'zeitraum' };
+  }
+
+  function verjaehrungsBox(vj) {
+    if (vj.level === 'kritisch') {
+      return '<div class="bg-red-500/20 border border-red-400/40 rounded-2xl p-4 sm:p-5 mb-5 flex gap-3 items-start">' +
+        '<span class="material-symbols-outlined text-red-300 shrink-0 mt-0.5" style="font-variation-settings:\'FILL\' 1;">timer_off</span>' +
+        '<div class="text-sm leading-relaxed text-white/90">' +
+          '<strong class="text-red-200 block mb-1">Wichtig: Verjährung prüfen!</strong>' +
+          'Ansprüche verjähren in der Regel 3 Jahre nach Jahresende (§§ 195, 199 BGB) — dein Fall könnte betroffen sein. ' +
+          '<strong>Aber:</strong> Laufende Verhandlungen, ein Anerkenntnis oder bestimmte Schreiben können die Frist hemmen oder neu starten. Genau das prüfen wir als Erstes — reich den Fall trotzdem ein, aber warte nicht länger.' +
+        '</div></div>';
+    }
+    if (vj.level === 'knapp') {
+      return '<div class="bg-amber-400/15 border border-amber-300/30 rounded-2xl p-4 sm:p-5 mb-5 flex gap-3 items-start">' +
+        '<span class="material-symbols-outlined text-amber-200 shrink-0 mt-0.5" style="font-variation-settings:\'FILL\' 1;">hourglass_bottom</span>' +
+        '<div class="text-sm leading-relaxed text-white/90">' +
+          '<strong class="text-amber-100 block mb-1">Die Verjährungsfrist läuft.</strong>' +
+          'Ansprüche verjähren in der Regel 3 Jahre nach Jahresende (§§ 195, 199 BGB)' + (vj.days != null ? ' — bei deinem Datum bleiben rechnerisch noch etwa <strong>' + Math.max(0, Math.round(vj.days / 30)) + ' Monate</strong>' : '') + '. Je früher wir starten, desto entspannter läuft die Durchsetzung.' +
+        '</div></div>';
+    }
+    return '';
   }
 
   function renderAIBlock() {
@@ -1029,10 +1087,11 @@
         formInput('sr-f-name', 'name', 'Dein Name *', 'text', fv.name, 'Vor- und Nachname', true) +
         formInput('sr-f-email', 'email', 'E-Mail *', 'email', fv.email, 'du@example.de', true) +
       '</div>' +
-      '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">' +
+      '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-1">' +
         formInput('sr-f-telefon', 'telefon', 'Telefon (optional)', 'tel', fv.telefon, '0160 1234567', false) +
         formInput('sr-f-datum', 'vorfall_datum', 'Datum des Vorfalls', 'date', fv.vorfall_datum, '', false) +
       '</div>' +
+      '<div id="sr-f-datum-hinweis" class="mb-3"></div>' +
 
       // Fallbeschreibung mit Voice
       '<div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-3 ring-1 ring-white/10">' +
@@ -1094,8 +1153,15 @@
     ['name', 'email', 'telefon', 'vorfall_datum', 'description', 'anmerkungen'].forEach(function(n, i) {
       var ids = ['sr-f-name','sr-f-email','sr-f-telefon','sr-f-datum','sr-f-desc','sr-f-anm'];
       var elIn = document.getElementById(ids[i]);
-      if (elIn) elIn.addEventListener('input', function() { state.formValues[n] = elIn.value; persistState(); });
+      if (elIn) elIn.addEventListener('input', function() { state.formValues[n] = elIn.value; persistState(); if (n === 'vorfall_datum') updateDatumHinweis(); });
     });
+    function updateDatumHinweis() {
+      var box = document.getElementById('sr-f-datum-hinweis');
+      if (!box) return;
+      var vj = verjaehrungsInfo();
+      box.innerHTML = (state.formValues.vorfall_datum || state.answers.zeit) ? verjaehrungsBox(vj) : '';
+    }
+    updateDatumHinweis();
     // Checkboxen
     [['sr-f-consent-privacy','consent_privacy'],['sr-f-consent-contact','consent_contact']].forEach(function(p) {
       var cb = document.getElementById(p[0]);
@@ -1219,6 +1285,7 @@
       fd.append('consent_privacy', fv.consent_privacy ? 'true' : 'false');
       fd.append('consent_contact', fv.consent_contact ? 'true' : 'false');
       fd.append('consent_ts', new Date().toISOString());
+      fd.append('verjaehrung', verjaehrungsInfo().level);
 
       // Schadenrechner-Kontext
       if (!state.skipped) {
@@ -1402,6 +1469,7 @@
             '</div>' +
           '</div>';
       }
+      html += verjaehrungsBox(verjaehrungsInfo());
     }
 
     if (isFinal) {
