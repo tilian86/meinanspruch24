@@ -72,7 +72,7 @@
   <article class="max-w-3xl mx-auto prose">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[#f47935] mb-3">Rechtliches</div>
     <h1 class="text-3xl sm:text-4xl font-extrabold text-[#0b2330] leading-tight mb-4">Datenschutzerklärung</h1>
-    <p class="text-sm text-[#4d5c66] !mb-0">Stand: 16. April 2026</p>
+    <p class="text-sm text-[#4d5c66] !mb-0">Stand: 29. September 2026</p>
 
     <div class="my-8 p-5 rounded-2xl bg-amber-50 border border-amber-200 text-sm text-amber-900 leading-relaxed">
       <strong>Status:</strong> MeinAnspruch24 befindet sich in der Aufbauphase. Der Schadenrechner und das Einreichungs-Formular sind technisch funktionsfähig.
@@ -115,23 +115,23 @@
     <h2>4. Schadenrechner und KI-gestützte Einschätzung</h2>
     <p>Der Schadenrechner ist eine clientseitige Anwendung, die ohne Daten­übertragung läuft, bis du eine der folgenden Funktionen aktiv auslöst:</p>
 
-    <h3>4.1 Sprach­transkription (Whisper)</h3>
+    <h3>4.1 Sprach­transkription (GPT-Transcribe)</h3>
     <p>
       Klickst du auf das Mikrofon-Symbol, fragt dein Browser einmalig um Erlaubnis zum Mikrofon­zugriff. Die aufgenommene Audiodatei
-      wird über unseren Cloudflare-Worker an die <strong>OpenAI API</strong> übermittelt und dort durch das Modell <em>whisper-1</em>
+      wird über unseren Cloudflare-Worker an die <strong>OpenAI API</strong> übermittelt und dort durch das Modell <em>gpt-transcribe</em>
       in Text umgewandelt. Die Audiodatei wird unmittelbar nach der Transkription verworfen und nicht bei uns gespeichert.
     </p>
 
-    <h3>4.2 Redaktionelle Glättung (GPT-5.4-mini)</h3>
+    <h3>4.2 Redaktionelle Glättung (GPT-6 Luna)</h3>
     <p>
-      Der transkribierte Text wird im Anschluss an das Modell <em>gpt-5.4-mini</em> übergeben, um Füll­wörter zu entfernen
+      Der transkribierte Text wird im Anschluss an das Modell <em>gpt-6-luna</em> übergeben, um Füll­wörter zu entfernen
       und Interpunktion zu setzen. Inhalt und Bedeutung bleiben unverändert. Du kannst das Ergebnis im Textfeld jederzeit selbst überarbeiten.
     </p>
 
-    <h3>4.3 KI-Analyse (GPT-5.4)</h3>
+    <h3>4.3 KI-Analyse (GPT-6 Sol)</h3>
     <p>
       Auf deine ausdrückliche Anforderung hin („KI-Analyse starten") werden deine Antworten aus dem Schadenrechner
-      (Sparte, Status, Höhe, Zeit, Rechtsschutz) sowie deine Fall­beschreibung an das Modell <em>gpt-5.4</em> übermittelt.
+      (Sparte, Status, Höhe, Zeit, Rechtsschutz) sowie deine Fall­beschreibung an das Modell <em>gpt-6-sol</em> übermittelt.
       Das Modell liefert eine strukturierte juristische Ersteinschätzung mit Erfolgs­tendenz, Stärken und Risiken zurück.
       Diese Einschätzung ist <strong>kein Ersatz für eine Rechts­beratung</strong> und stellt keine Garantie dar.
     </p>
